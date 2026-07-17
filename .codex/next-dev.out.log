@@ -1,0 +1,15 @@
+
+> yabbok@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.7 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.188.6:3000
+- Environments: .env.local
+✓ Ready in 1627ms
+Creating turbopack project { dir: 'C:\\Jabbok2', testMode: true }
+
+Connected to MongoDB database.
+ GET /api/events 200 in 1749ms (next.js: 1536ms, application-code: 213ms)
+ GET /api/events 200 in 228ms (next.js: 139ms, application-code: 89ms)
+[?25h

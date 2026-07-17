@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-gold-50: #fdfaf2;
+  --color-gold-100: #faf1d8;
+  --color-gold-200: #f3e0b0;
+  --color-gold-300: #ebc77d;
+  --color-gold-400: #e2ab4e;
+  --color-gold-500: #d4af37; /* Spiritual Gold */
+  --color-gold-600: #b89127;
+  --color-gold-700: #94711c;
+  --color-gold-800: #705315;
+  --color-gold-900: #4c370d;
+  
+  --font-ethiopian: "Nyala", "Abyssinica SIL", "Kefa", "Noto Sans Ethiopic", "Segoe UI", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply antialiased selection:bg-gold-500/30;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-100 dark:bg-slate-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-slate-700 rounded-full hover:bg-gold-500;
+}
+
+/* Glassmorphism utility classes */
+.glass-panel {
+  @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/20 dark:border-slate-800/40;
+}
+
+.glass-card {
+  @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-slate-200/50 dark:border-slate-800/60 shadow-sm hover:shadow-md transition-all duration-300;
+}
+
+/* Ethiopic-specific line height adjustment */
+.lang-am {
+  font-family: var(--font-ethiopian);
+  line-height: 1.75;
+}
