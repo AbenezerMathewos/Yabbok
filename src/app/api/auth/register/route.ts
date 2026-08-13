@@ -34,7 +34,8 @@ export async function POST(req: Request) {
       !churchId ||
       !churchBranch ||
       !region ||
-      !educationalStatus
+      !educationalStatus ||
+      !profilePhoto
     ) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
