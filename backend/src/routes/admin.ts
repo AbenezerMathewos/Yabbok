@@ -1,18 +1,19 @@
-import { NextResponse } from "next/server";
-import { Model, Types } from "mongoose";
-import { connectToDatabase } from "@/backend/lib/mongodb";
-import { handleApiError, requirePermission } from "@/backend/auth/session";
-import { isApprovalStatus } from "@/backend/auth/roles";
-import AuditLog from "@/backend/models/AuditLog";
-import DiscussionTopic from "@/backend/models/DiscussionTopic";
-import Event from "@/backend/models/Event";
-import GalleryItem from "@/backend/models/GalleryItem";
-import Notification from "@/backend/models/Notification";
-import PrayerRequest from "@/backend/models/PrayerRequest";
-import Sermon from "@/backend/models/Sermon";
-import Testimony from "@/backend/models/Testimony";
-import Announcement from "@/backend/models/Announcement";
-import User from "@/backend/models/User";
+import express from 'express';
+import { requireAuth } from '../middleware/auth';
+import { hasPermission, isApprovalStatus } from '../auth/roles';
+import mongoose, { Model, Types } from 'mongoose';
+import AuditLog from '../models/AuditLog';
+import DiscussionTopic from '../models/DiscussionTopic';
+import Event from '../models/Event';
+import GalleryItem from '../models/GalleryItem';
+import Notification from '../models/Notification';
+import PrayerRequest from '../models/PrayerRequest';
+import Sermon from '../models/Sermon';
+import Testimony from '../models/Testimony';
+import Announcement from '../models/Announcement';
+import User from '../models/User';
+
+const router = express.Router();
 
 type ContentType = "prayers" | "testimonies" | "discussions" | "gallery" | "sermons" | "events" | "announcements";
 
@@ -28,14 +29,14 @@ interface ModeratableDocument {
   moderatedAt?: Date;
 }
 
-const contentModels: Record<ContentType, Model<ModeratableDocument>> = {
-  prayers: PrayerRequest as Model<ModeratableDocument>,
-  testimonies: Testimony as Model<ModeratableDocument>,
-  discussions: DiscussionTopic as Model<ModeratableDocument>,
-  gallery: GalleryItem as Model<ModeratableDocument>,
-  sermons: Sermon as Model<ModeratableDocument>,
-  events: Event as Model<ModeratableDocument>,
-  announcements: Announcement as Model<ModeratableDocument>,
+const contentModels: Record<ContentType, Model<any>> = {
+  prayers: PrayerRequest as Model<any>,
+  testimonies: Testimony as Model<any>,
+  discussions: DiscussionTopic as Model<any>,
+  gallery: GalleryItem as Model<any>,
+  sermons: Sermon as Model<any>,
+  events: Event as Model<any>,
+  announcements: Announcement as Model<any>,
 };
 
 const populateByType: Partial<Record<ContentType, string[]>> = {
@@ -56,17 +57,21 @@ function getOwnerId(item: ModeratableDocument) {
   return item.user || item.uploadedBy || item.organizer || item.createdBy;
 }
 
-export async function GET(req: Request) {
-  try {
-    await requirePermission("content:moderate");
-    await connectToDatabase();
+// requireAuth middleware ensures req.user is set
+router.use(requireAuth);
 
-    const { searchParams } = new URL(req.url);
-    const type = searchParams.get("type");
-    const status = searchParams.get("status") || "pending";
+router.get('/moderation', async (req, res) => {
+  try {
+    const user = req.user;
+    if (!hasPermission(user.role as any, "content:moderate")) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const type = req.query.type as string | undefined;
+    const status = (req.query.status as string) || "pending";
 
     if (type && !isContentType(type)) {
-      return NextResponse.json({ error: "Invalid content type" }, { status: 400 });
+      return res.status(400).json({ error: "Invalid content type" });
     }
 
     const types = type ? [type as ContentType] : (Object.keys(contentModels) as ContentType[]);
@@ -86,25 +91,28 @@ export async function GET(req: Request) {
       })
     );
 
-    return NextResponse.json(results.flat());
-  } catch (error) {
-    return handleApiError(error, "Moderation queue fetch failed");
+    res.json(results.flat());
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ error: "Moderation queue fetch failed", details: error.message });
   }
-}
+});
 
-export async function PATCH(req: Request) {
+router.patch('/moderation', async (req, res) => {
   try {
-    const moderator = await requirePermission("content:moderate");
-    const { type, id, status, note } = await req.json();
+    const user = req.user;
+    if (!hasPermission(user.role as any, "content:moderate")) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    const moderator = user;
+    const { type, id, status, note } = req.body;
 
     if (!isContentType(type) || !id || !isApprovalStatus(status)) {
-      return NextResponse.json({ error: "Invalid moderation request" }, { status: 400 });
+      return res.status(400).json({ error: "Invalid moderation request" });
     }
 
-    await connectToDatabase();
-
     if ((type === "gallery" || type === "sermons" || type === "events" || type === "announcements") && status === "approved" && moderator.role !== "super_admin") {
-      return NextResponse.json({ error: "Only super admin can approve gallery, sermon, event, and announcement content." }, { status: 403 });
+      return res.status(403).json({ error: "Only super admin can approve gallery, sermon, event, and announcement content." });
     }
 
     const item = await contentModels[type].findByIdAndUpdate(
@@ -119,7 +127,7 @@ export async function PATCH(req: Request) {
     );
 
     if (!item) {
-      return NextResponse.json({ error: "Content not found" }, { status: 404 });
+      return res.status(404).json({ error: "Content not found" });
     }
 
     const ownerId = getOwnerId(item);
@@ -133,7 +141,6 @@ export async function PATCH(req: Request) {
       });
     }
 
-    // Trigger notifications for approved announcements
     if (type === "announcements" && status === "approved") {
       const announcement = item as any;
       const userQuery =
@@ -145,7 +152,7 @@ export async function PATCH(req: Request) {
               ? { _id: announcement.userId, status: "active" }
               : { status: "active" };
 
-      const recipients = await User.find(userQuery).select("_id");
+      const recipients = await User.find(userQuery as any).select("_id");
       if (recipients.length > 0) {
         await Notification.insertMany(
           recipients.map((recipient) => ({
@@ -167,8 +174,11 @@ export async function PATCH(req: Request) {
       details: `Status changed to ${status}${note ? `: ${note}` : ""}`,
     });
 
-    return NextResponse.json(item);
-  } catch (error) {
-    return handleApiError(error, "Moderation update failed");
+    res.json(item);
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ error: "Moderation update failed", details: error.message });
   }
-}
+});
+
+export default router;

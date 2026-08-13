@@ -1,15 +1,18 @@
-import { NextResponse } from "next/server";
-import { getCurrentUser, handleApiError, requireUser } from "@/backend/auth/session";
-import { hasPermission } from "@/backend/auth/roles";
-import { connectToDatabase } from "@/backend/lib/mongodb";
-import PrayerRequest from "@/backend/models/PrayerRequest";
-import mongoose from "mongoose";
+import express from 'express';
+import { requireAuth } from '../middleware/auth';
+import PrayerRequest from '../models/PrayerRequest';
+import mongoose from 'mongoose';
+import { hasPermission } from '../auth/roles';
+import { getToken } from 'next-auth/jwt';
 
-export async function GET() {
+const router = express.Router();
+
+router.get('/', async (req, res) => {
   try {
-    await connectToDatabase();
-    const user = await getCurrentUser();
-    const canModerate = user && hasPermission(user.role, "content:moderate");
+    const secret = process.env.NEXTAUTH_SECRET || "yabbok-super-secret-key-12345";
+    const user = await getToken({ req, secret });
+    const canModerate = user && hasPermission(user.role as any, "content:moderate");
+
     const prayers = await PrayerRequest.find({
       deletedAt: { $exists: false },
       ...(canModerate ? {} : { approvalStatus: "approved" }),
@@ -18,27 +21,24 @@ export async function GET() {
       .populate("comments.user", "name profilePhoto role")
       .sort({ createdAt: -1 });
 
-    return NextResponse.json(prayers);
-  } catch (error) {
-    return handleApiError(error, "Prayers fetch failed");
+    res.json(prayers);
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ error: "Prayers fetch failed", details: error.message });
   }
-}
+});
 
-export async function POST(req: Request) {
+router.post('/', requireAuth, async (req, res) => {
   try {
-    const userObj = await requireUser();
-
-    const { searchParams } = new URL(req.url);
-    const action = searchParams.get("action");
-    const body = await req.json();
-
-    await connectToDatabase();
+    const userObj = req.user;
+    const action = req.query.action as string;
+    const body = req.body;
 
     // 1. Create a new prayer request
     if (!action) {
       const { content, isAnonymous } = body;
       if (!content) {
-        return NextResponse.json({ error: "Content is required" }, { status: 400 });
+        return res.status(400).json({ error: "Content is required" });
       }
 
       const newPrayer = await PrayerRequest.create({
@@ -53,25 +53,25 @@ export async function POST(req: Request) {
       });
 
       const populated = await newPrayer.populate("user", "name profilePhoto role");
-      return NextResponse.json(populated, { status: 201 });
+      return res.status(201).json(populated);
     }
 
     // For actions, target prayer ID is required
     const { prayerId } = body;
     if (!prayerId) {
-      return NextResponse.json({ error: "Prayer ID is required" }, { status: 400 });
+      return res.status(400).json({ error: "Prayer ID is required" });
     }
 
     const prayer = await PrayerRequest.findById(prayerId);
     if (!prayer) {
-      return NextResponse.json({ error: "Prayer request not found" }, { status: 444 });
+      return res.status(404).json({ error: "Prayer request not found" });
     }
 
     // 2. Add Comment
     if (action === "comment") {
       const { content } = body;
       if (!content) {
-        return NextResponse.json({ error: "Comment content is required" }, { status: 400 });
+        return res.status(400).json({ error: "Comment content is required" });
       }
 
       prayer.comments.push({
@@ -85,7 +85,7 @@ export async function POST(req: Request) {
         .populate("user", "name profilePhoto role")
         .populate("comments.user", "name profilePhoto role");
 
-      return NextResponse.json(updatedPrayer);
+      return res.json(updatedPrayer);
     }
 
     // 3. Mark as "I Prayed For You"
@@ -94,10 +94,8 @@ export async function POST(req: Request) {
       const index = prayer.prayedForBy.findIndex((id) => id.toString() === userId);
 
       if (index === -1) {
-        // Add to list
         prayer.prayedForBy.push(new mongoose.Types.ObjectId(userId) as any);
       } else {
-        // Toggle off if clicked again
         prayer.prayedForBy.splice(index, 1);
       }
 
@@ -106,21 +104,19 @@ export async function POST(req: Request) {
         .populate("user", "name profilePhoto role")
         .populate("comments.user", "name profilePhoto role");
 
-      return NextResponse.json(updatedPrayer);
+      return res.json(updatedPrayer);
     }
 
     // 4. React (like, love, amen, praise_god, pray)
     if (action === "react") {
       const { type } = body;
       if (!type) {
-        return NextResponse.json({ error: "Reaction type is required" }, { status: 400 });
+        return res.status(400).json({ error: "Reaction type is required" });
       }
 
       const userId = userObj.id;
-      // Remove existing reaction by user if any
       prayer.reactions = prayer.reactions.filter((r) => r.user.toString() !== userId);
       
-      // Add new reaction
       prayer.reactions.push({
         user: userId,
         type,
@@ -131,11 +127,14 @@ export async function POST(req: Request) {
         .populate("user", "name profilePhoto role")
         .populate("comments.user", "name profilePhoto role");
 
-      return NextResponse.json(updatedPrayer);
+      return res.json(updatedPrayer);
     }
 
-    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
-  } catch (error) {
-    return handleApiError(error, "Prayer action failed");
+    return res.status(400).json({ error: "Invalid action" });
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ error: "Prayer action failed", details: error.message });
   }
-}
+});
+
+export default router;

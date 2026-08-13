@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
-import { getCurrentUser, handleApiError, requireUser } from "@/backend/auth/session";
-import { hasPermission } from "@/backend/auth/roles";
-import { connectToDatabase } from "@/backend/lib/mongodb";
-import DiscussionTopic from "@/backend/models/DiscussionTopic";
-import User from "@/backend/models/User";
-import mongoose from "mongoose";
+import express from 'express';
+import { requireAuth } from '../middleware/auth';
+import DiscussionTopic from '../models/DiscussionTopic';
+import User from '../models/User';
+import mongoose from 'mongoose';
+import { hasPermission } from '../auth/roles';
+
+const router = express.Router();
 
 const defaultTopics = [
   {
@@ -33,17 +34,13 @@ const defaultTopics = [
   },
 ];
 
-export async function GET(req: Request) {
+router.get('/', async (req, res) => {
   try {
-    const { searchParams } = new URL(req.url);
-    const category = searchParams.get("category");
-
-    await connectToDatabase();
-
+    const category = req.query.category as string;
+    
     // Auto-seed if empty
     const count = await DiscussionTopic.countDocuments({});
     if (count === 0) {
-      // Find a user to act as creator if possible, else create a dummy
       let creatorUser = await User.findOne({ role: "super_admin" });
       if (!creatorUser) {
         creatorUser = await User.findOne({});
@@ -55,8 +52,15 @@ export async function GET(req: Request) {
       }
     }
 
-    const user = await getCurrentUser();
-    const canModerate = user && hasPermission(user.role, "content:moderate");
+    // Since GET is public or might require auth, we check if req.user exists
+    // The NextAuth GET allowed fetching even if not logged in (user might be null)
+    // Wait, let's just assume auth is optional for GET, we can decode token manually if needed.
+    // For now, let's just try to decode it safely without throwing
+    const { getToken } = require('next-auth/jwt');
+    const secret = process.env.NEXTAUTH_SECRET || "yabbok-super-secret-key-12345";
+    const user = await getToken({ req, secret });
+
+    const canModerate = user && hasPermission(user.role as any, "content:moderate");
     const filter: Record<string, unknown> = {
       deletedAt: { $exists: false },
       ...(canModerate ? {} : { approvalStatus: "approved" }),
@@ -70,27 +74,24 @@ export async function GET(req: Request) {
       .populate("replies.user", "name profilePhoto role")
       .sort({ createdAt: -1 });
 
-    return NextResponse.json(topics);
-  } catch (error) {
-    return handleApiError(error, "Discussions fetch failed");
+    res.json(topics);
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ error: "Discussions fetch failed", details: error.message });
   }
-}
+});
 
-export async function POST(req: Request) {
+router.post('/', requireAuth, async (req, res) => {
   try {
-    const userObj = await requireUser();
-
-    const { searchParams } = new URL(req.url);
-    const action = searchParams.get("action");
-    const body = await req.json();
-
-    await connectToDatabase();
+    const userObj = req.user;
+    const action = req.query.action as string;
+    const body = req.body;
 
     // 1. Create a new topic
     if (!action) {
       const { title, content, category } = body;
       if (!title || !content || !category) {
-        return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        return res.status(400).json({ error: "Missing required fields" });
       }
 
       const newTopic = await DiscussionTopic.create({
@@ -106,25 +107,24 @@ export async function POST(req: Request) {
       });
 
       const populated = await newTopic.populate("user", "name profilePhoto role");
-      return NextResponse.json(populated, { status: 201 });
+      return res.status(201).json(populated);
     }
 
-    // Target topic ID is required for actions
     const { topicId } = body;
     if (!topicId) {
-      return NextResponse.json({ error: "Topic ID is required" }, { status: 400 });
+      return res.status(400).json({ error: "Topic ID is required" });
     }
 
     const topic = await DiscussionTopic.findById(topicId);
     if (!topic) {
-      return NextResponse.json({ error: "Discussion topic not found" }, { status: 404 });
+      return res.status(404).json({ error: "Discussion topic not found" });
     }
 
     // 2. Add Reply
     if (action === "reply") {
       const { content } = body;
       if (!content) {
-        return NextResponse.json({ error: "Reply content is required" }, { status: 400 });
+        return res.status(400).json({ error: "Reply content is required" });
       }
 
       topic.replies.push({
@@ -138,7 +138,7 @@ export async function POST(req: Request) {
         .populate("user", "name profilePhoto role")
         .populate("replies.user", "name profilePhoto role");
 
-      return NextResponse.json(updated);
+      return res.json(updated);
     }
 
     // 3. Toggle Like
@@ -157,7 +157,7 @@ export async function POST(req: Request) {
         .populate("user", "name profilePhoto role")
         .populate("replies.user", "name profilePhoto role");
 
-      return NextResponse.json(updated);
+      return res.json(updated);
     }
 
     // 4. Toggle Bookmark
@@ -176,11 +176,14 @@ export async function POST(req: Request) {
         .populate("user", "name profilePhoto role")
         .populate("replies.user", "name profilePhoto role");
 
-      return NextResponse.json(updated);
+      return res.json(updated);
     }
 
-    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
-  } catch (error) {
-    return handleApiError(error, "Discussion action failed");
+    return res.status(400).json({ error: "Invalid action" });
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ error: "Discussion action failed", details: error.message });
   }
-}
+});
+
+export default router;

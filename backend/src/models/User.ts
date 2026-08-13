@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
-import { Role, UserStatus } from "@/backend/auth/roles";
+import { Role, UserStatus } from "../auth/roles";
 
 export interface IUser extends Document {
   name: string;
