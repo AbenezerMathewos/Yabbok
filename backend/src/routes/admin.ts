@@ -181,4 +181,16 @@ router.patch('/moderation', async (req, res) => {
   }
 });
 
+import statsRouter from './admin/stats';
+import usersRouter from './admin/users';
+import logsRouter from './admin/logs';
+import reportsRouter from './admin/reports';
+import announcementsRouter from './admin/announcements';
+
+router.use('/stats', statsRouter);
+router.use('/users', usersRouter);
+router.use('/logs', logsRouter);
+router.use('/reports', reportsRouter);
+router.use('/announcements', announcementsRouter);
+
 export default router;
