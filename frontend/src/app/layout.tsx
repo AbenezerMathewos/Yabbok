@@ -5,9 +5,9 @@ import { ThemeProvider } from "@/frontend/context/ThemeProvider";
 import { AuthProvider } from "@/frontend/context/AuthContext";
 import { Geist } from "next/font/google";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { SmoothScroll } from "@/components/ui/smooth-scroll";
+import { ScrollProgress } from "@/components/ui/scroll-progress";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const plusJakarta = Plus_Jakarta_Sans({
@@ -32,10 +32,22 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
             <LanguageProvider>
+              <ScrollProgress />
               <SmoothScroll>
                 {children}
               </SmoothScroll>
-              <Toaster richColors position="top-right" />
+              <Toaster 
+                richColors 
+                position="top-right" 
+                toastOptions={{
+                  style: {
+                    background: 'var(--slate-900)',
+                    color: 'var(--gold-400)',
+                    border: '1px solid var(--slate-800)',
+                  },
+                  className: 'font-sans font-bold shadow-2xl',
+                }}
+              />
             </LanguageProvider>
           </ThemeProvider>
         </AuthProvider>
