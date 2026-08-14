@@ -7,6 +7,7 @@ import { Geist } from "next/font/google";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
+import { SmoothScroll } from "@/components/ui/smooth-scroll";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const plusJakarta = Plus_Jakarta_Sans({
@@ -31,7 +32,9 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
             <LanguageProvider>
-              {children}
+              <SmoothScroll>
+                {children}
+              </SmoothScroll>
               <Toaster richColors position="top-right" />
             </LanguageProvider>
           </ThemeProvider>

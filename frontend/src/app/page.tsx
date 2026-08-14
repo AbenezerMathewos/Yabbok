@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { TextRepel } from "@/components/ui/text-repel";
+import { Magnetic } from "@/components/ui/magnetic";
 
 export default function HomePage() {
   const { data: session } = useSession();
@@ -138,26 +139,35 @@ export default function HomePage() {
               className="flex flex-wrap justify-center gap-4"
             >
               {session ? (
-                <Link
-                  href="/dashboard"
-                  className="px-8 py-4 text-base font-bold text-slate-950 bg-gradient-to-r from-gold-400 to-amber-500 hover:from-gold-300 hover:to-amber-400 rounded-2xl shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-gold-500/30"
-                >
-                  {t("navDashboard")}
-                </Link>
+                <Magnetic strength={0.2}>
+                  <Link
+                    href="/dashboard"
+                    className="px-8 py-4 text-base font-bold text-slate-950 bg-gradient-to-r from-gold-400 to-amber-500 hover:from-gold-300 hover:to-amber-400 rounded-2xl shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-gold-500/30 flex items-center justify-center"
+                    data-interactive
+                  >
+                    {t("navDashboard")}
+                  </Link>
+                </Magnetic>
               ) : (
                 <>
-                  <Link
-                    href="/register"
-                    className="px-8 py-4 text-base font-bold text-slate-950 bg-gradient-to-r from-gold-400 to-amber-500 hover:from-gold-300 hover:to-amber-400 rounded-2xl shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-gold-500/30"
-                  >
-                    {t("btnJoin")}
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="px-8 py-4 text-base font-bold text-white border-2 border-slate-700/50 hover:border-slate-500 hover:bg-slate-800 rounded-2xl backdrop-blur-sm transition-all duration-300"
-                  >
-                    {t("btnLogin")}
-                  </Link>
+                  <Magnetic strength={0.2}>
+                    <Link
+                      href="/register"
+                      className="px-8 py-4 text-base font-bold text-slate-950 bg-gradient-to-r from-gold-400 to-amber-500 hover:from-gold-300 hover:to-amber-400 rounded-2xl shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-gold-500/30 flex items-center justify-center"
+                      data-interactive
+                    >
+                      {t("btnJoin")}
+                    </Link>
+                  </Magnetic>
+                  <Magnetic strength={0.1}>
+                    <Link
+                      href="/login"
+                      className="px-8 py-4 text-base font-bold text-white border-2 border-slate-700/50 hover:border-slate-500 hover:bg-slate-800 rounded-2xl backdrop-blur-sm transition-all duration-300 flex items-center justify-center"
+                      data-interactive
+                    >
+                      {t("btnLogin")}
+                    </Link>
+                  </Magnetic>
                 </>
               )}
               <Link
@@ -375,33 +385,36 @@ export default function HomePage() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: i * 0.1 }}
-                        className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/60 shadow-sm hover:shadow-md transition-shadow flex gap-6"
+                        className="group relative p-6 rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 hover:border-gold-500/50 shadow-lg hover:shadow-[0_0_30px_-5px_rgba(250,204,21,0.3)] transition-all duration-500 hover:-translate-y-2 flex gap-6 overflow-hidden"
                       >
-                        <div className="flex-shrink-0 flex flex-col items-center justify-center bg-gradient-to-b from-gold-100 to-gold-50 dark:from-gold-900/40 dark:to-gold-900/10 text-gold-700 dark:text-gold-400 rounded-2xl w-20 h-20 border border-gold-200 dark:border-gold-800/50 shadow-inner">
-                          <span className="text-3xl font-black leading-none">
+                        {/* Decorative background glow */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-gold-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none" />
+                        
+                        <div className="relative z-10 flex-shrink-0 flex flex-col items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 text-gold-400 rounded-2xl w-20 h-20 border border-slate-700 group-hover:border-gold-500/40 transition-colors shadow-inner">
+                          <span className="text-3xl font-black leading-none drop-shadow-md group-hover:text-gold-300 transition-colors">
                             {new Date(event.date).getDate()}
                           </span>
-                          <span className="text-[10px] font-black uppercase tracking-widest mt-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest mt-1 text-slate-400 group-hover:text-gold-200 transition-colors">
                             {new Date(event.date).toLocaleString(language, { month: "short" })}
                           </span>
                         </div>
-                        <div>
-                          <span className="text-[10px] uppercase font-black tracking-widest text-gold-500">
+                        <div className="relative z-10">
+                          <span className="text-[10px] uppercase font-black tracking-widest text-gold-500 bg-gold-500/10 px-2 py-1 rounded-full">
                             {event.category}
                           </span>
-                          <h3 className="font-bold text-lg text-slate-900 dark:text-white mt-1 mb-2">
+                          <h3 className="font-bold text-lg text-white mt-3 mb-2 group-hover:text-gold-100 transition-colors">
                             {event.title}
                           </h3>
-                          <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 mb-3">
+                          <p className="text-sm text-slate-400 line-clamp-2 mb-3">
                             {event.description}
                           </p>
                           <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-500">
-                            <span className="flex items-center gap-1.5">
-                              <MapPin size={14} className="text-slate-400" /> {event.location}
+                            <span className="flex items-center gap-1.5 group-hover:text-slate-300 transition-colors">
+                              <MapPin size={14} className="text-gold-500/70" /> {event.location}
                             </span>
                             {event.isLive && (
-                              <span className="flex items-center gap-1 text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-md uppercase tracking-wider text-[10px]">
-                                🔴 Live ({event.livePlatform})
+                              <span className="flex items-center gap-1 text-emerald-400 bg-emerald-900/30 border border-emerald-500/20 px-2 py-1 rounded-md uppercase tracking-wider text-[10px] shadow-[0_0_10px_rgba(52,211,153,0.1)]">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live ({event.livePlatform})
                               </span>
                             )}
                           </div>
@@ -438,19 +451,22 @@ export default function HomePage() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: i * 0.1 }}
-                        className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/60 shadow-sm hover:shadow-md transition-shadow flex gap-6 items-center group"
+                        className="group p-5 rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 hover:border-gold-500/40 shadow-lg hover:shadow-[0_0_25px_-5px_rgba(250,204,21,0.2)] transition-all duration-500 hover:-translate-y-2 flex gap-5 items-center cursor-pointer relative overflow-hidden"
                       >
-                        <div className="flex-shrink-0 flex items-center justify-center bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-16 h-16 text-slate-400 group-hover:text-gold-500 group-hover:bg-gold-50 dark:group-hover:bg-gold-900/20 transition-colors">
-                          <Volume2 size={28} />
+                        {/* Decorative background glow */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-gold-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                        <div className="relative z-10 flex-shrink-0 flex items-center justify-center bg-slate-800 rounded-2xl w-14 h-14 text-slate-400 group-hover:text-gold-400 group-hover:bg-slate-800/80 group-hover:border group-hover:border-gold-500/30 transition-all duration-300 shadow-inner">
+                          <Volume2 size={24} className="group-hover:scale-110 transition-transform duration-300" />
                         </div>
-                        <div className="flex-grow">
-                          <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight mb-1">
+                        <div className="relative z-10 flex-grow">
+                          <h3 className="font-bold text-base text-white leading-tight mb-1 group-hover:text-gold-100 transition-colors">
                             {sermon.title}
                           </h3>
-                          <p className="text-sm text-gold-600 dark:text-gold-400 font-bold mb-1">
+                          <p className="text-sm text-gold-500 font-bold mb-0.5">
                             {sermon.speaker}
                           </p>
-                          <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-1">
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 group-hover:text-slate-400 transition-colors">
                             {new Date(sermon.date).toLocaleDateString(language, { dateStyle: "medium" })}
                           </p>
                         </div>
@@ -541,23 +557,32 @@ export default function HomePage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.1 }}
-                    className="p-8 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/60 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
+                    className="h-full"
                   >
-                    <div>
-                      <span className="inline-flex px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest bg-gold-100 dark:bg-gold-950/55 text-gold-700 dark:text-gold-400">
-                        📍 {church.city}, {church.region}
-                      </span>
-                      <h3 className="font-black text-2xl text-slate-950 dark:text-white mt-4 mb-3">
-                        {church.name}
-                      </h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium line-clamp-3">
-                        {church.description}
-                      </p>
-                    </div>
-                    <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center text-sm font-bold">
-                      <span className="text-slate-400">
-                        {language === 'en' ? 'Members:' : 'አባላት፦'} <strong className="text-slate-900 dark:text-white">{church.memberCount}</strong>
-                      </span>
+                    <div className="group relative p-8 bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 hover:border-gold-500/50 shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(250,204,21,0.2)] hover:-translate-y-2 transition-all duration-500 flex flex-col justify-between h-full w-full rounded-3xl overflow-hidden cursor-pointer">
+                      {/* Decorative glowing orb behind text */}
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-gold-500/10 rounded-full blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                      
+                      <div className="relative z-10">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-800 border border-slate-700 text-gold-400 group-hover:bg-gold-500/10 group-hover:border-gold-500/30 transition-colors">
+                          <span className="w-1.5 h-1.5 rounded-full bg-gold-500 shadow-[0_0_5px_rgba(250,204,21,0.8)]" />
+                          {church.city}, {church.region}
+                        </span>
+                        <h3 className="font-black text-2xl text-white mt-5 mb-3 group-hover:text-gold-50 transition-colors">
+                          {church.name}
+                        </h3>
+                        <p className="text-sm text-slate-400 leading-relaxed font-medium line-clamp-3 group-hover:text-slate-300 transition-colors">
+                          {church.description}
+                        </p>
+                      </div>
+                      <div className="relative z-10 mt-8 pt-6 border-t border-slate-700/50 group-hover:border-gold-500/20 flex justify-between items-center text-sm font-bold transition-colors">
+                        <span className="text-slate-500 flex items-center gap-2 uppercase tracking-wider text-[10px]">
+                          {language === 'en' ? 'Total Members' : 'አጠቃላይ አባላት'}
+                        </span>
+                        <span className="px-3 py-1 bg-slate-800 rounded-md text-gold-400 font-black border border-slate-700 group-hover:border-gold-500/30 transition-colors">
+                          {church.memberCount}
+                        </span>
+                      </div>
                     </div>
                   </motion.div>
                 ))
