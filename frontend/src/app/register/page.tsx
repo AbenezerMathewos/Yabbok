@@ -4,15 +4,17 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/frontend/context/LanguageContext";
-import { Navbar } from "@/frontend/components/shared/Navbar";
-import { Footer } from "@/frontend/components/shared/Footer";
-import { Check, ArrowRight, ArrowLeft, Loader2, CheckCircle2, Camera, User } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Check, ArrowRight, ArrowLeft, Loader2, CheckCircle2, Camera, User, BookOpen, Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 export default function RegisterPage() {
   const router = useRouter();
   const { t, language } = useLanguage();
 
-  // Multi-step state
   const [step, setStep] = useState(1);
   const [churches, setChurches] = useState([]);
   const [loadingChurches, setLoadingChurches] = useState(true);
@@ -21,10 +23,10 @@ export default function RegisterPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>("");
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
-  // Form states
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -43,29 +45,20 @@ export default function RegisterPage() {
   });
 
   useEffect(() => {
-    // Fetch churches for dropdown selection
     fetch("/api/churches")
       .then((res) => res.json())
       .then((data) => {
         setChurches(data);
-        if (data.length > 0) {
-          setForm((f) => ({ ...f, churchId: data[0]._id }));
-        }
+        if (data.length > 0) setForm((f) => ({ ...f, churchId: data[0]._id }));
         setLoadingChurches(false);
       })
-      .catch((err) => {
-        console.error(err);
-        setLoadingChurches(false);
-      });
+      .catch(() => setLoadingChurches(false));
   }, []);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      setErrorMsg("Photo must be under 5MB.");
-      return;
-    }
+    if (file.size > 5 * 1024 * 1024) { setErrorMsg("Photo must be under 5MB."); return; }
     setPhotoFile(file);
     const reader = new FileReader();
     reader.onload = () => setPhotoPreview(reader.result as string);
@@ -75,25 +68,21 @@ export default function RegisterPage() {
 
   const uploadPhoto = async (): Promise<string> => {
     if (!photoFile) return form.profilePhoto;
-    setUploadingPhoto(true);
     const fd = new FormData();
     fd.append("file", photoFile);
     fd.append("folder", "profiles");
     const res = await fetch("/api/upload", { method: "POST", body: fd });
-    setUploadingPhoto(false);
-    if (res.ok) {
-      const { url } = await res.json();
-      return url;
-    }
+    if (res.ok) { const { url } = await res.json(); return url; }
     throw new Error("Photo upload failed");
   };
 
   const handleMinistryToggle = (area: string) => {
-    if (form.ministryAreas.includes(area)) {
-      setForm({ ...form, ministryAreas: form.ministryAreas.filter((m) => m !== area) });
-    } else {
-      setForm({ ...form, ministryAreas: [...form.ministryAreas, area] });
-    }
+    setForm({
+      ...form,
+      ministryAreas: form.ministryAreas.includes(area)
+        ? form.ministryAreas.filter((m) => m !== area)
+        : [...form.ministryAreas, area],
+    });
   };
 
   const handleNext = () => {
@@ -104,508 +93,413 @@ export default function RegisterPage() {
       if (!form.email) missing.push("Email");
       if (!form.phone) missing.push("Phone");
       if (!form.dob) missing.push("Date of Birth");
-      if (missing.length > 0) {
-        setErrorMsg(`Please fill in: ${missing.join(", ")}`);
-        return;
-      }
+      if (missing.length > 0) { setErrorMsg(`Please fill in: ${missing.join(", ")}`); return; }
     } else if (step === 2) {
       const missing = [];
       if (!form.churchId) missing.push("Church");
-      if (!form.churchBranch) missing.push("Church Branch / Sub-branch");
+      if (!form.churchBranch) missing.push("Church Branch");
       if (!form.region) missing.push("Region / City");
-      if (missing.length > 0) {
-        setErrorMsg(`Please fill in: ${missing.join(", ")}`);
-        return;
-      }
+      if (missing.length > 0) { setErrorMsg(`Please fill in: ${missing.join(", ")}`); return; }
     }
     setStep(step + 1);
-  };
-
-  const handlePrev = () => {
-    setErrorMsg("");
-    setStep(step - 1);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
-
-    if (!photoFile) {
-      setErrorMsg("Please upload a profile photo from local storage.");
-      return;
-    }
-
-    if (!form.password) {
-      setErrorMsg("Please enter a password.");
-      return;
-    }
-    if (!form.confirmPassword) {
-      setErrorMsg("Please confirm your password.");
-      return;
-    }
-    if (form.password.length < 6) {
-      setErrorMsg("Password must be at least 6 characters.");
-      return;
-    }
-    if (form.password !== form.confirmPassword) {
-      setErrorMsg(t("errPasswordMatch"));
-      return;
-    }
-
+    if (!photoFile) { setErrorMsg("Please upload a profile photo."); return; }
+    if (!form.password) { setErrorMsg("Please enter a password."); return; }
+    if (form.password.length < 6) { setErrorMsg("Password must be at least 6 characters."); return; }
+    if (form.password !== form.confirmPassword) { setErrorMsg(t("errPasswordMatch")); return; }
     setSubmitting(true);
-
     try {
-      // Upload photo first if selected
       let photoUrl = form.profilePhoto;
-      if (photoFile) {
-        try {
-          photoUrl = await uploadPhoto();
-        } catch {
-          setErrorMsg("Photo upload failed. Please try again.");
-          setSubmitting(false);
-          return;
-        }
-      }
-
+      try { photoUrl = await uploadPhoto(); } catch { setErrorMsg("Photo upload failed."); setSubmitting(false); return; }
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, profilePhoto: photoUrl }),
       });
-
       const data = await res.json();
-      if (!res.ok) {
-        setErrorMsg(data.error || "Registration failed. Try again.");
-        setSubmitting(false);
-      } else {
-        setSuccess(true);
-        setSubmitting(false);
-      }
-    } catch (err) {
-      setErrorMsg("An error occurred during submission. Check connection.");
+      if (!res.ok) { setErrorMsg(data.error || "Registration failed."); setSubmitting(false); }
+      else { setSuccess(true); setSubmitting(false); }
+    } catch {
+      setErrorMsg("An error occurred. Check your connection.");
       setSubmitting(false);
     }
   };
 
-  const ministryOptions = [
-    "Choir",
-    "Worship Team",
-    "Evangelism",
-    "Prayer Ministry",
-    "Media Team",
-    "Usher",
-    "Sunday School",
-    "Youth Leadership",
-    "Bible Study Leader",
-    "Other",
-  ];
+  const ministryOptions = ["Choir", "Worship Team", "Evangelism", "Prayer Ministry", "Media Team", "Usher", "Sunday School", "Youth Leadership", "Bible Study Leader", "Other"];
+  const educationOptions = ["Elementary School", "High School", "University Student", "Graduate", "Employee / Worker", "Business Owner"];
+  const TOTAL_STEPS = 3;
 
-  const educationOptions = [
-    "Elementary School",
-    "High School",
-    "University Student",
-    "Graduate",
-    "Employee / Worker",
-    "Business Owner",
+  const stepLabels = [
+    language === "en" ? "Personal Info" : "የግል መረጃ",
+    language === "en" ? "Church Details" : "ቤተክርስቲያን",
+    language === "en" ? "Ministry & Account" : "አገልግሎት",
   ];
 
   return (
-    <>
-      <Navbar />
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Top bar */}
+      <div className="border-b border-border/50 px-6 py-4 flex items-center justify-between">
+        <Link href="/" className="inline-flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center shadow-lg">
+            <BookOpen size={18} className="text-slate-950" />
+          </div>
+          <div>
+            <p className="text-foreground font-black text-base leading-none">Yabbok</p>
+            <p className="text-primary text-[10px] font-bold uppercase tracking-widest leading-none mt-0.5">Fellowship</p>
+          </div>
+        </Link>
+        <p className="text-sm text-muted-foreground hidden sm:block">
+          {language === "en" ? "Already a member?" : "ቀድሞ አባል ነዎት?"}{" "}
+          <Link href="/login" className="text-primary font-bold hover:underline">{t("btnLogin")}</Link>
+        </p>
+      </div>
 
-      <main className="flex-grow bg-slate-50 dark:bg-slate-950 flex items-center justify-center py-16 transition-colors duration-300">
-        <div className="w-full max-w-2xl px-4">
-          <div className="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/60 shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-gold-500 to-amber-500"></div>
+      {/* Main content */}
+      <div className="flex-1 flex items-start justify-center px-4 py-10">
+        <div className="w-full max-w-2xl">
 
-            {/* Success page */}
-            {success ? (
-              <div className="text-center py-10">
-                <CheckCircle2 size={64} className="text-emerald-500 mx-auto mb-4 animate-bounce" />
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
-                  {language === "en" ? "Registration Submitted!" : "ምዝገባው ተልኳል!"}
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-8 leading-relaxed">
-                  {t("regSuccess")}
-                </p>
-                <Link
-                  href="/login"
-                  className="px-8 py-3 bg-gold-500 hover:bg-gold-600 text-slate-950 font-bold rounded-xl text-xs transition-all shadow"
-                >
-                  {t("btnLogin")}
-                </Link>
+          {/* Success screen */}
+          {success ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-20"
+            >
+              <div className="w-24 h-24 mx-auto mb-6 bg-emerald-500/10 rounded-full flex items-center justify-center">
+                <CheckCircle2 size={52} className="text-emerald-500" />
               </div>
-            ) : (
-              <div>
-                {/* Headers */}
-                <div className="text-center mb-8">
-                  <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">
-                    {t("regTitle")}
-                  </h1>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    {t("regSubtitle")}
-                  </p>
-                </div>
+              <h2 className="text-3xl font-black text-foreground mb-3">
+                {language === "en" ? "Registration Submitted!" : "ምዝገባው ተልኳል!"}
+              </h2>
+              <p className="text-muted-foreground max-w-md mx-auto mb-8 leading-relaxed font-medium">
+                {t("regSuccess")}
+              </p>
+              <Button
+                onClick={() => router.push("/login")}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold h-12 px-8 rounded-xl gold-glow"
+              >
+                {t("btnLogin")}
+              </Button>
+            </motion.div>
+          ) : (
+            <>
+              {/* Header */}
+              <div className="text-center mb-10">
+                <h1 className="text-4xl font-black text-foreground tracking-tight mb-2">{t("regTitle")}</h1>
+                <p className="text-muted-foreground font-medium">{t("regSubtitle")}</p>
+              </div>
 
-                {/* Progress Indicators */}
-                <div className="flex items-center justify-center gap-2 mb-8">
-                  {[1, 2, 3].map((s) => (
-                    <div key={s} className="flex items-center">
-                      <span className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border ${
-                        step === s 
-                          ? "bg-gold-500 border-gold-500 text-slate-950" 
-                          : step > s 
-                          ? "bg-emerald-500 border-emerald-500 text-white" 
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600"
-                      }`}>
-                        {step > s ? <Check size={14} /> : s}
-                      </span>
-                      {s < 3 && <div className={`w-12 h-1 ${step > s ? "bg-emerald-500" : "bg-slate-200 dark:bg-slate-800"}`} />}
-                    </div>
-                  ))}
+              {/* Step Progress */}
+              <div className="mb-10">
+                <div className="flex items-center justify-between mb-2">
+                  {stepLabels.map((label, i) => {
+                    const s = i + 1;
+                    const isDone = step > s;
+                    const isActive = step === s;
+                    return (
+                      <div key={s} className="flex items-center flex-1">
+                        <div className="flex flex-col items-center">
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-black text-sm border-2 transition-all duration-300 ${
+                            isDone ? "bg-emerald-500 border-emerald-500 text-white" :
+                            isActive ? "bg-primary border-primary text-primary-foreground shadow-lg gold-glow" :
+                            "bg-muted border-border text-muted-foreground"
+                          }`}>
+                            {isDone ? <Check size={16} /> : s}
+                          </div>
+                          <p className={`text-[10px] font-bold mt-1.5 whitespace-nowrap ${isActive ? "text-primary" : isDone ? "text-emerald-500" : "text-muted-foreground"}`}>
+                            {label}
+                          </p>
+                        </div>
+                        {s < TOTAL_STEPS && (
+                          <div className={`flex-1 h-0.5 mx-2 mt-[-18px] rounded-full transition-all duration-500 ${step > s ? "bg-emerald-500" : "bg-border"}`} />
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
+              </div>
 
-                {/* Errors message banner */}
+              {/* Error message */}
+              <AnimatePresence>
                 {errorMsg && (
-                  <div className="p-4 mb-5 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20 text-xs text-center font-semibold">
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mb-6 p-4 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 text-sm font-semibold flex items-center gap-2"
+                  >
                     ⚠️ {errorMsg}
-                  </div>
+                  </motion.div>
                 )}
+              </AnimatePresence>
 
-                {/* Form wizard steps */}
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  
-                  {/* Step 1: Personal */}
-                  {step === 1 && (
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-bold text-gold-500 uppercase tracking-wider">
-                        Step 1: {t("regStepPersonal")}
-                      </h3>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                          {t("formName")} <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={form.name}
-                          onChange={(e) => setForm({ ...form, name: e.target.value })}
-                          className="w-full px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-950 focus:outline-none focus:border-gold-500 text-sm"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                            {t("formEmail")} <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="email"
-                            required
-                            value={form.email}
-                            onChange={(e) => setForm({ ...form, email: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-950 focus:outline-none focus:border-gold-500 text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                            {t("regPhone")} <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="tel"
-                            required
-                            value={form.phone}
-                            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                            placeholder="+251..."
-                            className="w-full px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-950 focus:outline-none focus:border-gold-500 text-sm"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                            {t("regGender")}
-                          </label>
-                          <select
-                            value={form.gender}
-                            onChange={(e) => setForm({ ...form, gender: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-950 focus:outline-none focus:border-gold-500 text-sm"
-                          >
-                            <option value="male">{t("regMale")}</option>
-                            <option value="female">{t("regFemale")}</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                            {t("regDob")} <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="date"
-                            required
-                            value={form.dob}
-                            onChange={(e) => setForm({ ...form, dob: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-950 focus:outline-none focus:border-gold-500 text-sm"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Step 2: Church Details */}
-                  {step === 2 && (
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-bold text-gold-500 uppercase tracking-wider">
-                        Step 2: {t("regStepChurch")}
-                      </h3>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                          {t("regChurchName")} <span className="text-red-500">*</span>
-                        </label>
-                        {loadingChurches ? (
-                          <div className="flex gap-2 items-center text-xs text-slate-400">
-                            <Loader2 className="animate-spin" size={14} /> Loading Churches...
+              {/* Form Card */}
+              <div className="bg-card border border-border/60 rounded-3xl shadow-sm overflow-hidden">
+                <form onSubmit={handleSubmit}>
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={step}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25 }}
+                      className="p-8 space-y-6"
+                    >
+                      {/* ── STEP 1: Personal Info ── */}
+                      {step === 1 && (
+                        <>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="outline" className="text-primary border-primary font-bold uppercase tracking-widest text-[10px]">Step 1</Badge>
+                            <h2 className="text-lg font-black text-foreground">{t("regStepPersonal")}</h2>
                           </div>
-                        ) : churches.length === 0 ? (
-                          <div className="p-3 rounded-xl border border-amber-400/40 bg-amber-50 dark:bg-amber-900/10 text-xs text-amber-700 dark:text-amber-400">
-                            ⚠️ No churches have been added yet. Please ask an admin to add your church first, or{" "}
-                            <a href="/login" className="underline font-bold">log in as admin</a>{" "}
-                            and add one from the Admin Panel → Church Management.
+
+                          <div className="space-y-2">
+                            <Label htmlFor="name" className="text-sm font-semibold">{t("formName")} <span className="text-destructive">*</span></Label>
+                            <Input id="name" type="text" required value={form.name}
+                              onChange={(e) => setForm({ ...form, name: e.target.value })}
+                              className="h-12 rounded-xl" placeholder="Abebe Kebede" />
                           </div>
-                        ) : (
-                          <select
-                            value={form.churchId}
-                            onChange={(e) => setForm({ ...form, churchId: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-950 focus:outline-none focus:border-gold-500 text-sm"
-                          >
-                            <option value="">-- Select your church --</option>
-                            {churches.map((church: any) => (
-                              <option key={church._id} value={church._id}>
-                                {church.name} ({church.city})
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                      </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                            {t("regChurchBranch")} <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="e.g. Youth Choir or Sunday Branch"
-                            value={form.churchBranch}
-                            onChange={(e) => setForm({ ...form, churchBranch: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-950 focus:outline-none focus:border-gold-500 text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                            {t("regRegion")} <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="e.g. Sidama / Hawassa"
-                            value={form.region}
-                            onChange={(e) => setForm({ ...form, region: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-950 focus:outline-none focus:border-gold-500 text-sm"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Step 3: Ministry & Credentials */}
-                  {step === 3 && (
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-bold text-gold-500 uppercase tracking-wider">
-                        Step 3: {t("regStepMinistry")}
-                      </h3>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">
-                          {t("regMinistryArea")}
-                        </label>
-                        <div className="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto p-3 rounded-xl border border-slate-200 dark:border-slate-800">
-                          {ministryOptions.map((area) => {
-                            const isChecked = form.ministryAreas.includes(area);
-                            return (
-                              <label key={area} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={() => handleMinistryToggle(area)}
-                                  className="rounded text-gold-500 focus:ring-gold-500"
-                                />
-                                <span>{area}</span>
-                              </label>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Profile Photo Upload */}
-                      <div className="flex flex-col items-center gap-3 mb-2">
-                        <div
-                          onClick={() => photoInputRef.current?.click()}
-                          className="relative w-24 h-24 rounded-full border-4 border-dashed border-slate-300 dark:border-slate-700 hover:border-amber-500 cursor-pointer overflow-hidden flex items-center justify-center bg-slate-100 dark:bg-slate-800 transition-all group"
-                        >
-                          {photoPreview ? (
-                            <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
-                          ) : (
-                            <User size={36} className="text-slate-400 group-hover:text-amber-500 transition-colors" />
-                          )}
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-full">
-                            <Camera size={20} className="text-white" />
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="reg-email" className="text-sm font-semibold">{t("formEmail")} <span className="text-destructive">*</span></Label>
+                              <Input id="reg-email" type="email" required value={form.email}
+                                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                                className="h-12 rounded-xl" placeholder="name@example.com" />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="phone" className="text-sm font-semibold">{t("regPhone")} <span className="text-destructive">*</span></Label>
+                              <Input id="phone" type="tel" required value={form.phone}
+                                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                                className="h-12 rounded-xl" placeholder="+251..." />
+                            </div>
                           </div>
-                        </div>
-                        <div className="text-center">
-                          <button
-                            type="button"
-                            onClick={() => photoInputRef.current?.click()}
-                            className="text-xs font-bold text-amber-600 hover:text-amber-700 underline"
-                          >
-                            {photoPreview ? "Change Photo" : "Upload Profile Photo"}
-                          </button>
-                          <p className="text-[10px] text-slate-400 mt-0.5">Required · JPG, PNG, WEBP · Max 5MB</p>
-                        </div>
-                        <input
-                          ref={photoInputRef}
-                          type="file"
-                          accept="image/jpeg,image/jpg,image/png,image/webp"
-                          onChange={handlePhotoChange}
-                          className="hidden"
-                        />
-                      </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                            {t("regEduStatus")} <span className="text-red-500">*</span>
-                          </label>
-                          <select
-                            value={form.educationalStatus}
-                            onChange={(e) => setForm({ ...form, educationalStatus: e.target.value })}
-                            className="w-full px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-950 focus:outline-none focus:border-gold-500 text-sm"
-                          >
-                            {educationOptions.map((edu) => (
-                              <option key={edu} value={edu}>
-                                {edu}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="gender" className="text-sm font-semibold">{t("regGender")}</Label>
+                              <select id="gender" value={form.gender}
+                                onChange={(e) => setForm({ ...form, gender: e.target.value })}
+                                className="w-full h-12 px-4 border border-input rounded-xl bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                                <option value="male">{t("regMale")}</option>
+                                <option value="female">{t("regFemale")}</option>
+                              </select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="dob" className="text-sm font-semibold">{t("regDob")} <span className="text-destructive">*</span></Label>
+                              <Input id="dob" type="date" required value={form.dob}
+                                onChange={(e) => setForm({ ...form, dob: e.target.value })}
+                                className="h-12 rounded-xl" />
+                            </div>
+                          </div>
+                        </>
+                      )}
 
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                          {t("regBio")}
-                        </label>
-                        <textarea
-                          rows={2}
-                          value={form.bio}
-                          onChange={(e) => setForm({ ...form, bio: e.target.value })}
-                          className="w-full px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-950 focus:outline-none focus:border-gold-500 text-sm resize-none"
-                        />
-                      </div>
+                      {/* ── STEP 2: Church Details ── */}
+                      {step === 2 && (
+                        <>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="outline" className="text-primary border-primary font-bold uppercase tracking-widest text-[10px]">Step 2</Badge>
+                            <h2 className="text-lg font-black text-foreground">{t("regStepChurch")}</h2>
+                          </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                            {t("regPassword")} <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="password"
-                            required
-                            value={form.password}
-                            onChange={(e) => setForm({ ...form, password: e.target.value })}
-                            placeholder="••••••••"
-                            className="w-full px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-950 focus:outline-none focus:border-gold-500 text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                            {t("regConfirmPassword")} <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="password"
-                            required
-                            value={form.confirmPassword}
-                            onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-                            placeholder="••••••••"
-                            className="w-full px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-950 focus:outline-none focus:border-gold-500 text-sm"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                          <div className="space-y-2">
+                            <Label htmlFor="church" className="text-sm font-semibold">{t("regChurchName")} <span className="text-destructive">*</span></Label>
+                            {loadingChurches ? (
+                              <div className="h-12 flex items-center gap-2 text-sm text-muted-foreground">
+                                <Loader2 className="animate-spin" size={16} /> Loading churches…
+                              </div>
+                            ) : churches.length === 0 ? (
+                              <div className="p-4 rounded-xl border border-amber-400/40 bg-amber-50 dark:bg-amber-900/10 text-sm text-amber-700 dark:text-amber-400 font-medium">
+                                ⚠️ No churches added yet. Ask an admin to add your church first.
+                              </div>
+                            ) : (
+                              <select id="church" value={form.churchId}
+                                onChange={(e) => setForm({ ...form, churchId: e.target.value })}
+                                className="w-full h-12 px-4 border border-input rounded-xl bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                                <option value="">-- {language === "en" ? "Select your church" : "ቤተ ክርስቲያንዎን ይምረጡ"} --</option>
+                                {churches.map((church: any) => (
+                                  <option key={church._id} value={church._id}>{church.name} ({church.city})</option>
+                                ))}
+                              </select>
+                            )}
+                          </div>
 
-                  {/* Multi-step Footer Navigation */}
-                  <div className="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-slate-800">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="branch" className="text-sm font-semibold">{t("regChurchBranch")} <span className="text-destructive">*</span></Label>
+                              <Input id="branch" type="text" required
+                                placeholder="e.g. Youth Choir or Sunday Branch"
+                                value={form.churchBranch}
+                                onChange={(e) => setForm({ ...form, churchBranch: e.target.value })}
+                                className="h-12 rounded-xl" />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="region" className="text-sm font-semibold">{t("regRegion")} <span className="text-destructive">*</span></Label>
+                              <Input id="region" type="text" required
+                                placeholder="e.g. Sidama / Hawassa"
+                                value={form.region}
+                                onChange={(e) => setForm({ ...form, region: e.target.value })}
+                                className="h-12 rounded-xl" />
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {/* ── STEP 3: Ministry & Credentials ── */}
+                      {step === 3 && (
+                        <>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="outline" className="text-primary border-primary font-bold uppercase tracking-widest text-[10px]">Step 3</Badge>
+                            <h2 className="text-lg font-black text-foreground">{t("regStepMinistry")}</h2>
+                          </div>
+
+                          {/* Ministry Areas */}
+                          <div className="space-y-3">
+                            <Label className="text-sm font-semibold">{t("regMinistryArea")}</Label>
+                            <div className="flex flex-wrap gap-2">
+                              {ministryOptions.map((area) => {
+                                const selected = form.ministryAreas.includes(area);
+                                return (
+                                  <button
+                                    key={area}
+                                    type="button"
+                                    onClick={() => handleMinistryToggle(area)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all duration-200 ${
+                                      selected
+                                        ? "bg-primary border-primary text-primary-foreground shadow-sm"
+                                        : "bg-muted border-border text-muted-foreground hover:border-primary/50"
+                                    }`}
+                                  >
+                                    {selected && <Check size={11} className="inline mr-1" />}{area}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Profile Photo */}
+                          <div className="space-y-3">
+                            <Label className="text-sm font-semibold">
+                              {language === "en" ? "Profile Photo" : "የፕሮፋይል ፎቶ"} <span className="text-destructive">*</span>
+                            </Label>
+                            <div className="flex items-center gap-5">
+                              <div
+                                onClick={() => photoInputRef.current?.click()}
+                                className="relative w-20 h-20 rounded-2xl border-2 border-dashed border-border hover:border-primary cursor-pointer overflow-hidden flex items-center justify-center bg-muted transition-all group shrink-0"
+                              >
+                                {photoPreview ? (
+                                  <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                                ) : (
+                                  <User size={28} className="text-muted-foreground group-hover:text-primary transition-colors" />
+                                )}
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                  <Camera size={18} className="text-white" />
+                                </div>
+                              </div>
+                              <div>
+                                <button
+                                  type="button"
+                                  onClick={() => photoInputRef.current?.click()}
+                                  className="text-sm font-bold text-primary hover:text-primary/80 underline"
+                                >
+                                  {photoPreview ? (language === "en" ? "Change photo" : "ፎቶ ቀይር") : (language === "en" ? "Upload profile photo" : "ፎቶ ጫን")}
+                                </button>
+                                <p className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP · Max 5MB</p>
+                              </div>
+                              <input ref={photoInputRef} type="file" accept="image/jpeg,image/jpg,image/png,image/webp" onChange={handlePhotoChange} className="hidden" />
+                            </div>
+                          </div>
+
+                          {/* Education */}
+                          <div className="space-y-2">
+                            <Label htmlFor="edu" className="text-sm font-semibold">{t("regEduStatus")}</Label>
+                            <select id="edu" value={form.educationalStatus}
+                              onChange={(e) => setForm({ ...form, educationalStatus: e.target.value })}
+                              className="w-full h-12 px-4 border border-input rounded-xl bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                              {educationOptions.map((edu) => <option key={edu} value={edu}>{edu}</option>)}
+                            </select>
+                          </div>
+
+                          {/* Bio */}
+                          <div className="space-y-2">
+                            <Label htmlFor="bio" className="text-sm font-semibold">{t("regBio")}</Label>
+                            <textarea id="bio" rows={3} value={form.bio}
+                              onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                              className="w-full px-4 py-3 border border-input rounded-xl bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                              placeholder={language === "en" ? "Tell us briefly about yourself…" : "ስለ እራስዎ በአጭሩ ይነግሩን…"} />
+                          </div>
+
+                          {/* Password */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="reg-password" className="text-sm font-semibold">{t("regPassword")} <span className="text-destructive">*</span></Label>
+                              <div className="relative">
+                                <Input id="reg-password" type={showPassword ? "text" : "password"} required
+                                  value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
+                                  placeholder="••••••••" className="h-12 rounded-xl pr-12" />
+                                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                </button>
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="confirm-password" className="text-sm font-semibold">{t("regConfirmPassword")} <span className="text-destructive">*</span></Label>
+                              <div className="relative">
+                                <Input id="confirm-password" type={showConfirmPassword ? "text" : "password"} required
+                                  value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                                  placeholder="••••••••" className="h-12 rounded-xl pr-12" />
+                                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
+
+                  {/* Navigation Footer */}
+                  <div className="px-8 py-5 border-t border-border/60 bg-muted/30 flex justify-between items-center">
                     {step > 1 ? (
-                      <button
-                        type="button"
-                        onClick={handlePrev}
-                        className="px-4 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-gold-500 flex items-center gap-1"
-                      >
-                        <ArrowLeft size={12} />
-                        <span>{t("btnPrev")}</span>
-                      </button>
-                    ) : (
-                      <div />
-                    )}
+                      <Button type="button" variant="outline" onClick={() => { setErrorMsg(""); setStep(step - 1); }}
+                        className="h-11 px-6 rounded-xl font-bold">
+                        <ArrowLeft size={16} className="mr-2" /> {t("btnPrev")}
+                      </Button>
+                    ) : <div />}
 
-                    {step < 3 ? (
-                      <button
-                        type="button"
-                        onClick={handleNext}
-                        className="px-5 py-2.5 bg-gold-500 hover:bg-gold-600 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-1"
-                      >
-                        <span>{t("btnNext")}</span>
-                        <ArrowRight size={12} />
-                      </button>
+                    {step < TOTAL_STEPS ? (
+                      <Button type="button" onClick={handleNext}
+                        className="h-11 px-8 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 shadow gold-glow">
+                        {t("btnNext")} <ArrowRight size={16} className="ml-2" />
+                      </Button>
                     ) : (
-                      <button
-                        type="submit"
-                        disabled={submitting}
-                        className="px-6 py-2.5 bg-gold-500 hover:bg-gold-600 disabled:bg-slate-300 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow"
-                      >
-                        {submitting ? (
-                          <Loader2 className="animate-spin" size={14} />
-                        ) : (
-                          <>
-                            <Check size={14} />
-                            <span>{t("btnSubmit")}</span>
-                          </>
-                        )}
-                      </button>
+                      <Button type="submit" disabled={submitting}
+                        className="h-11 px-8 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 shadow gold-glow">
+                        {submitting ? <Loader2 className="animate-spin mr-2" size={18} /> : <Check size={18} className="mr-2" />}
+                        {submitting ? (language === "en" ? "Submitting…" : "እየተላከ ነው…") : t("btnSubmit")}
+                      </Button>
                     )}
                   </div>
                 </form>
               </div>
-            )}
 
-            {/* Sign in footer link */}
-            {!success && (
-              <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-center text-xs text-slate-400">
-                {language === 'en' ? 'Already have an account?' : 'ቀድሞውኑ አካውንት አለዎት?'} &nbsp;
-                <Link href="/login" className="text-gold-600 dark:text-gold-400 font-semibold hover:underline">
-                  {t("btnLogin")}
-                </Link>
-              </div>
-            )}
-
-          </div>
+              {/* Footer */}
+              <p className="text-center text-sm text-muted-foreground mt-6">
+                {language === "en" ? "Already have an account?" : "ቀድሞ አካውንት አለዎት?"}{" "}
+                <Link href="/login" className="text-primary font-bold hover:underline">{t("btnLogin")}</Link>
+              </p>
+            </>
+          )}
         </div>
-      </main>
-
-      <Footer />
-    </>
+      </div>
+    </div>
   );
 }
