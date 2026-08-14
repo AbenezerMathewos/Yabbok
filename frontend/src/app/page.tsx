@@ -23,6 +23,7 @@ import { TextRepel } from "@/components/ui/text-repel";
 import { Magnetic } from "@/components/ui/magnetic";
 import { InfiniteMarquee } from "@/components/ui/infinite-marquee";
 import { BackgroundGeometric } from "@/components/ui/background-geometric";
+import { BackgroundGeometric } from "@/components/ui/background-geometric";
 import { InfiniteMarquee } from "@/components/ui/infinite-marquee";
 
 export default function HomePage() {
@@ -182,6 +183,11 @@ export default function HomePage() {
             </motion.div>
           </motion.div>
         </section>
+
+        {/* MARQUEE */}
+        <div className="py-8 border-y border-slate-200/50 dark:border-slate-800/50">
+          <InfiniteMarquee />
+        </div>
 
         {/* MARQUEE */}
         <div className="py-8 border-y border-slate-200/50 dark:border-slate-800/50">

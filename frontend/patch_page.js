@@ -4,14 +4,14 @@ const path = require('path');
 const pagePath = path.join(__dirname, 'src', 'app', 'page.tsx');
 let content = fs.readFileSync(pagePath, 'utf8');
 
-// 1. Add imports
+// 1. Add BackgroundGeometric import (InfiniteMarquee is already imported)
 content = content.replace(
-  'import { Magnetic } from "@/components/ui/magnetic";\r\n',
-  'import { Magnetic } from "@/components/ui/magnetic";\r\nimport { InfiniteMarquee } from "@/components/ui/infinite-marquee";\r\nimport { BackgroundGeometric } from "@/components/ui/background-geometric";\r\n'
+  'import { InfiniteMarquee } from "@/components/ui/infinite-marquee";\r\n',
+  'import { InfiniteMarquee } from "@/components/ui/infinite-marquee";\r\nimport { BackgroundGeometric } from "@/components/ui/background-geometric";\r\n'
 );
 content = content.replace(
-  'import { Magnetic } from "@/components/ui/magnetic";\n',
-  'import { Magnetic } from "@/components/ui/magnetic";\nimport { InfiniteMarquee } from "@/components/ui/infinite-marquee";\nimport { BackgroundGeometric } from "@/components/ui/background-geometric";\n'
+  'import { InfiniteMarquee } from "@/components/ui/infinite-marquee";\n',
+  'import { InfiniteMarquee } from "@/components/ui/infinite-marquee";\nimport { BackgroundGeometric } from "@/components/ui/background-geometric";\n'
 );
 
 // 2. Wrap root and add BackgroundGeometric
