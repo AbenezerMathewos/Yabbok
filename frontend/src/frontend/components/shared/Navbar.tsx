@@ -27,6 +27,7 @@ export const Navbar: React.FC = () => {
     { href: "/events", label: t("navEvents"), show: true },
     { href: "/mutual-aid", label: "Mutual Aid", show: !!session },
     { href: "/volunteer", label: "Volunteer Engine", show: !!session },
+    { href: "/benevolence", label: "Benevolence Fund", show: !!session },
     { href: "/mentorship", label: "Mentorship", show: !!session && isApproved },
     { href: "/counseling", label: "Counseling", show: !!session && isApproved },
     { href: "/gallery", label: t("navGallery"), show: true },
