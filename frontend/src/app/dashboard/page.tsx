@@ -23,7 +23,7 @@ import { DashboardChat } from "@/frontend/components/dashboard/DashboardChat";
 import { DashboardSuggestions } from "@/frontend/components/dashboard/DashboardSuggestions";
 import { DashboardProfile } from "@/frontend/components/dashboard/DashboardProfile";
 
-const TAB_LABELS: Record<string, { en: string; am: string; icon: React.ElementType }> = {
+const TAB_LABELS: Record<string, { en: string; am: string; icon: any }> = {
   summary:     { en: "Overview", am: "አጠቃላይ", icon: TrendingUp },
   feeds:       { en: "Fellowship Wall", am: "የህብረት ግንብ", icon: Heart },
   discussions: { en: "Bible Forum", am: "የውይይት መድረክ", icon: MessageSquare },
