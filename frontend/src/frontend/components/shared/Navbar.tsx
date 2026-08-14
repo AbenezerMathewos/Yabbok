@@ -8,7 +8,8 @@ import { useLanguage } from "@/frontend/context/LanguageContext";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { NotificationBell } from "./NotificationBell";
-import { Menu, X, ChevronDown, LogOut, Shield, Heart, Users, BookOpen, HandHeart, Calendar, MapPin, Briefcase, MessageSquareHeart } from "lucide-react";
+import { CommandPalette } from "./CommandPalette";
+import { Menu, X, ChevronDown, LogOut, Shield, Heart, Users, BookOpen, HandHeart, Calendar, MapPin, Briefcase, MessageSquareHeart, Search, Radio } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const Navbar: React.FC = () => {
@@ -18,6 +19,7 @@ export const Navbar: React.FC = () => {
   
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [isCmdOpen, setIsCmdOpen] = useState(false);
 
   const user = session?.user as any;
   const isApproved = user?.status === "active";
@@ -38,6 +40,7 @@ export const Navbar: React.FC = () => {
       label: language === 'en' ? "Media" : "ሚዲያ",
       key: "media",
       items: [
+        { href: "/live", label: language === 'en' ? "🔴 Live Stream" : "🔴 ቀጥታ ስርጭት", icon: <Radio size={16} className="text-rose-500 animate-pulse" />, show: true },
         { href: "/devotional", label: language === 'en' ? "Daily Devotional" : "የእለት ቃል", icon: <BookOpen size={16} />, show: true },
         { href: "/sermons", label: t("navSermons"), icon: <BookOpen size={16} />, show: true },
         { href: "/events", label: t("navEvents"), icon: <Calendar size={16} />, show: true },
@@ -154,6 +157,17 @@ export const Navbar: React.FC = () => {
 
           {/* Right Actions */}
           <div className="hidden md:flex items-center gap-4">
+            <button
+              onClick={() => setIsCmdOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-all shadow-sm"
+            >
+              <Search size={14} className="text-gold-500" />
+              <span>{language === "en" ? "Search..." : "ፈልግ..."}</span>
+              <kbd className="hidden lg:inline-block px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-[10px] text-slate-400 font-mono">
+                Ctrl K
+              </kbd>
+            </button>
+
             <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-full border border-slate-200 dark:border-slate-800">
               <LanguageSwitcher />
               <ThemeToggle />
@@ -313,6 +327,7 @@ export const Navbar: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      <CommandPalette isOpen={isCmdOpen} onClose={() => setIsCmdOpen(false)} />
     </nav>
   );
 };

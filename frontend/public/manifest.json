@@ -1,0 +1,21 @@
+{
+  "name": "YABBOK Youth Fellowship Platform",
+  "short_name": "YABBOK",
+  "description": "Bilingual fellowship platform uniting youth members across Kale Hiywet Churches in Ethiopia.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

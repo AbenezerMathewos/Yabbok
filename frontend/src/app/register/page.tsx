@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { PasswordStrengthMeter } from "@/frontend/components/shared/PasswordStrengthMeter";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -447,6 +448,7 @@ export default function RegisterPage() {
                                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                 </button>
                               </div>
+                              <PasswordStrengthMeter password={form.password} />
                             </div>
                             <div className="space-y-2">
                               <Label htmlFor="confirm-password" className="text-sm font-semibold">{t("regConfirmPassword")} <span className="text-destructive">*</span></Label>

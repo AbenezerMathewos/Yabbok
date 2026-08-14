@@ -22,6 +22,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "YABBOK - Youths Strong Fellowship Platform",
   description: "Bilingual fellowship platform uniting youth members across Kale Hiywet Churches in Ethiopia.",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
