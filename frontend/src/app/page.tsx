@@ -22,6 +22,8 @@ import { motion } from "framer-motion";
 import { TextRepel } from "@/components/ui/text-repel";
 import { Magnetic } from "@/components/ui/magnetic";
 import { InfiniteMarquee } from "@/components/ui/infinite-marquee";
+import { BackgroundGeometric } from "@/components/ui/background-geometric";
+import { InfiniteMarquee } from "@/components/ui/infinite-marquee";
 
 export default function HomePage() {
   const { data: session } = useSession();
@@ -181,8 +183,13 @@ export default function HomePage() {
           </motion.div>
         </section>
 
+        {/* MARQUEE */}
+        <div className="py-8 border-y border-slate-200/50 dark:border-slate-800/50">
+          <InfiniteMarquee />
+        </div>
+
         {/* BIBLE VERSE OF THE DAY */}
-        <section className="bg-gold-50/50 dark:bg-gold-950/10 py-10 border-y border-gold-200/50 dark:border-gold-800/20">
+        <section className="bg-transparent py-10 border-y border-gold-200/50 dark:border-gold-800/20">
           <motion.div 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -203,7 +210,7 @@ export default function HomePage() {
         </section>
 
         {/* ABOUT & VISION */}
-        <section className="py-24 bg-white dark:bg-slate-950 overflow-hidden">
+        <section className="py-24 bg-transparent overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <motion.div 
@@ -270,7 +277,7 @@ export default function HomePage() {
         </section>
 
         {/* CORE VALUES */}
-        <section className="py-24 bg-slate-50 dark:bg-slate-900/40">
+        <section className="py-24 bg-white/20 dark:bg-slate-900/20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
@@ -318,7 +325,7 @@ export default function HomePage() {
         </section>
 
         {/* LATEST ANNOUNCEMENTS */}
-        <section className="py-24 bg-white dark:bg-slate-950">
+        <section className="py-24 bg-transparent">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
@@ -359,7 +366,7 @@ export default function HomePage() {
         </section>
 
         {/* UPCOMING EVENTS & SERMONS PREVIEW */}
-        <section className="py-24 bg-slate-50 dark:bg-slate-900/40">
+        <section className="py-24 bg-white/20 dark:bg-slate-900/20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
               {/* Events Column */}
@@ -483,7 +490,7 @@ export default function HomePage() {
         </section>
 
         {/* STATISTICS */}
-        <section className="py-24 bg-slate-900 text-white relative overflow-hidden">
+        <section className="py-24 bg-transparent text-white relative overflow-hidden">
           <div className="absolute inset-0 bg-cover bg-center opacity-10" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1500&q=80')" }}></div>
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent"></div>
           
@@ -528,7 +535,7 @@ export default function HomePage() {
         </section>
 
         {/* PARTICIPATING CHURCHES PREVIEW */}
-        <section className="py-24 bg-white dark:bg-slate-950">
+        <section className="py-24 bg-transparent">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
@@ -601,7 +608,7 @@ export default function HomePage() {
         </section>
 
         {/* GALLERY PREVIEW & CALL TO ACTION */}
-        <section className="py-24 bg-slate-50 dark:bg-slate-900/40">
+        <section className="py-24 bg-white/20 dark:bg-slate-900/20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
@@ -664,7 +671,7 @@ export default function HomePage() {
 
         {/* JOIN THE FELLOWSHIP BANNER */}
         {!session && (
-          <section className="bg-gradient-to-r from-gold-400 via-gold-500 to-amber-500 py-24 text-slate-950">
+          <section className="bg-gradient-to-r from-gold-400/20 via-gold-500/20 to-amber-500/20 py-24 text-slate-100 backdrop-blur-md">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
               <motion.h2 
                 initial={{ opacity: 0, y: 20 }}
