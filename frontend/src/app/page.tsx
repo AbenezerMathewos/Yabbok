@@ -23,8 +23,6 @@ import { TextRepel } from "@/components/ui/text-repel";
 import { Magnetic } from "@/components/ui/magnetic";
 import { InfiniteMarquee } from "@/components/ui/infinite-marquee";
 import { BackgroundGeometric } from "@/components/ui/background-geometric";
-import { BackgroundGeometric } from "@/components/ui/background-geometric";
-import { InfiniteMarquee } from "@/components/ui/infinite-marquee";
 
 export default function HomePage() {
   const { data: session } = useSession();
