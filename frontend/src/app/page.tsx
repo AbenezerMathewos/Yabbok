@@ -21,6 +21,7 @@ import {
 import { motion } from "framer-motion";
 import { TextRepel } from "@/components/ui/text-repel";
 import { Magnetic } from "@/components/ui/magnetic";
+import { InfiniteMarquee } from "@/components/ui/infinite-marquee";
 
 export default function HomePage() {
   const { data: session } = useSession();
