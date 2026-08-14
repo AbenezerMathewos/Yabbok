@@ -2,13 +2,15 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Check, Clock, Loader2, MapPin, Video, Calendar, AlertCircle } from "lucide-react";
+import { Check, Clock, Loader2, MapPin, Video, Calendar, AlertCircle, Ticket } from "lucide-react";
 import { fetchEvents, registerForEvent, unregisterFromEvent } from "@/frontend/lib/api/eventsApi";
 import { useLanguage } from "@/frontend/context/LanguageContext";
 import { EVENT_CATEGORIES, EventDto } from "@/frontend/types/events";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { QRCodePassModal } from "@/frontend/components/events/QRCodePassModal";
+import { toast } from "sonner";
 
 const CATEGORY_FILTERS = ["all", ...EVENT_CATEGORIES] as const;
 type CategoryFilter = (typeof CATEGORY_FILTERS)[number];
@@ -27,6 +29,9 @@ export function EventsExperience() {
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("all");
   const [joinedEvents, setJoinedEvents] = useState<string[]>([]);
+  
+  // Modal State
+  const [selectedTicket, setSelectedTicket] = useState<{ event: any; ticketCode: string } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -52,7 +57,7 @@ export function EventsExperience() {
 
   const handleRegisterEvent = async (eventId: string) => {
     if (!session) {
-      alert(language === "en" ? "Please register/login to sign up for events!" : "ለዝግጅቶች ለመመዝገብ እባክዎ ይግቡ!");
+      toast.error(language === "en" ? "Please login to RSVP for events!" : "ለዝግጅቶች ለመመዝገብ እባክዎ ይግቡ!");
       return;
     }
     const isJoined = joinedEvents.includes(eventId);
@@ -60,12 +65,26 @@ export function EventsExperience() {
       if (isJoined) {
         await unregisterFromEvent(eventId);
         setJoinedEvents((current) => current.filter((id) => id !== eventId));
+        toast.info(language === "en" ? "RSVP cancelled." : "ምዝገባው ተሰርዟል።");
       } else {
         await registerForEvent(eventId);
         setJoinedEvents((current) => [...current, eventId]);
+
+        // Get QR ticket code from backend
+        const res = await fetch("/api/events/rsvp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ eventId }),
+        });
+        if (res.ok) {
+          const rsvpData = await res.json();
+          const evt = events.find((e) => e._id === eventId);
+          setSelectedTicket({ event: evt, ticketCode: rsvpData.ticketCode });
+          toast.success(language === "en" ? "RSVP Confirmed! Your digital QR ticket is ready." : "ምዝገባዎ ተረጋገጠ! የእርስዎ ዲጂታል QR ቲኬት ዝግጁ ነው።");
+        }
       }
     } catch (err) {
-      alert(language === "en" ? "Could not update RSVP." : "RSVP ማዘመን አልተቻለም።");
+      toast.error(language === "en" ? "Could not update RSVP." : "RSVP ማዘመን አልተቻለም።");
     }
   };
 
@@ -141,6 +160,14 @@ export function EventsExperience() {
             icon={<Calendar size={36} className="text-muted-foreground" />}
           />
         )}
+        {/* QRCode Modal */}
+        <QRCodePassModal
+          isOpen={!!selectedTicket}
+          event={selectedTicket?.event}
+          ticketCode={selectedTicket?.ticketCode || ""}
+          userName={(session?.user as any)?.name || "YSF Member"}
+          onClose={() => setSelectedTicket(null)}
+        />
       </div>
     </main>
   );

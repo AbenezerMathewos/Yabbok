@@ -3,6 +3,8 @@ import "./globals.css";
 import { LanguageProvider } from "@/frontend/context/LanguageContext";
 import { ThemeProvider } from "@/frontend/context/ThemeProvider";
 import { AuthProvider } from "@/frontend/context/AuthContext";
+import { AudioProvider } from "@/frontend/context/AudioContext";
+import { GlobalAudioPlayer } from "@/frontend/components/shared/GlobalAudioPlayer";
 import { Geist } from "next/font/google";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -33,22 +35,25 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
             <LanguageProvider>
-              <ScrollProgress />
-              <SmoothScroll>
-                {children}
-              </SmoothScroll>
-              <Toaster 
-                richColors 
-                position="top-right" 
-                toastOptions={{
-                  style: {
-                    background: 'var(--slate-900)',
-                    color: 'var(--gold-400)',
-                    border: '1px solid var(--slate-800)',
-                  },
-                  className: 'font-sans font-bold shadow-2xl',
-                }}
-              />
+              <AudioProvider>
+                <ScrollProgress />
+                <SmoothScroll>
+                  {children}
+                </SmoothScroll>
+                <GlobalAudioPlayer />
+                <Toaster 
+                  richColors 
+                  position="top-right" 
+                  toastOptions={{
+                    style: {
+                      background: 'var(--slate-900)',
+                      color: 'var(--gold-400)',
+                      border: '1px solid var(--slate-800)',
+                    },
+                    className: 'font-sans font-bold shadow-2xl',
+                  }}
+                />
+              </AudioProvider>
             </LanguageProvider>
           </ThemeProvider>
         </AuthProvider>

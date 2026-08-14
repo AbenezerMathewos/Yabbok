@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/frontend/context/LanguageContext";
+import { useAudio } from "@/frontend/context/AudioContext";
 import { Navbar } from "@/frontend/components/shared/Navbar";
 import { Footer } from "@/frontend/components/shared/Footer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,9 +17,9 @@ const fadeUp = (i = 0) => ({
 
 export default function SermonsPage() {
   const { t, language } = useLanguage();
+  const { playTrack, currentTrack, isPlaying } = useAudio();
   const [sermons, setSermons] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeAudioUrl, setActiveAudioUrl] = useState<string | null>(null);
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [expandedNotesId, setExpandedNotesId] = useState<string | null>(null);
 
@@ -105,22 +106,25 @@ export default function SermonsPage() {
                         <div className="flex flex-wrap md:flex-col gap-2 shrink-0">
                           {sermon.audioUrl && (
                             <button
-                              onClick={() => { setActiveAudioUrl(sermon.audioUrl === activeAudioUrl ? null : sermon.audioUrl); setActiveVideoId(null); }}
+                              onClick={() => {
+                                playTrack({ title: sermon.title, speaker: sermon.speaker, audioUrl: sermon.audioUrl });
+                                setActiveVideoId(null);
+                              }}
                               className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                                activeAudioUrl === sermon.audioUrl
-                                  ? "bg-destructive text-destructive-foreground"
+                                currentTrack?.audioUrl === sermon.audioUrl && isPlaying
+                                  ? "bg-gold-500 text-slate-950 animate-pulse"
                                   : "bg-primary text-primary-foreground hover:bg-primary/90 shadow gold-glow"
                               }`}
                             >
-                              {activeAudioUrl === sermon.audioUrl ? <Square size={14} /> : <Play size={14} fill="currentColor" />}
-                              {activeAudioUrl === sermon.audioUrl
-                                ? (language === "en" ? "Stop" : "አቁም")
+                              <Play size={14} fill="currentColor" />
+                              {currentTrack?.audioUrl === sermon.audioUrl && isPlaying
+                                ? (language === "en" ? "Now Playing..." : "እየተጫወተ ነው...")
                                 : (language === "en" ? "Play Audio" : "ድምጽ አጫውት")}
                             </button>
                           )}
                           {sermon.videoUrl && (
                             <button
-                              onClick={() => { setActiveVideoId(isVideoPlaying ? null : sermon._id); setActiveAudioUrl(null); }}
+                              onClick={() => { setActiveVideoId(isVideoPlaying ? null : sermon._id); }}
                               className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all border ${
                                 isVideoPlaying
                                   ? "bg-muted text-foreground border-border"
@@ -185,37 +189,6 @@ export default function SermonsPage() {
             </div>
           )}
         </div>
-
-        {/* ── Sticky Audio Player ── */}
-        <AnimatePresence>
-          {activeAudioUrl && (
-            <motion.div
-              initial={{ y: 100, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 100, opacity: 0 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-lg border-t border-primary/30 px-6 py-4 flex items-center justify-between gap-4 shadow-2xl"
-            >
-              <div className="flex items-center gap-3 shrink-0">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Music size={18} className="text-primary animate-pulse" />
-                </div>
-                <div className="hidden sm:block">
-                  <p className="text-white text-xs font-black">{language === "en" ? "Now Playing" : "አሁን እየተጫወተ"}</p>
-                  <p className="text-slate-400 text-[10px] font-medium">{language === "en" ? "Fellowship Audio Stream" : "የህብረት ድምጽ"}</p>
-                </div>
-              </div>
-              <audio src={activeAudioUrl} autoPlay controls className="flex-1 h-9 max-w-md rounded-lg" />
-              <button
-                onClick={() => setActiveAudioUrl(null)}
-                className="w-9 h-9 rounded-xl bg-destructive/20 hover:bg-destructive/40 flex items-center justify-center text-destructive shrink-0 transition-all"
-              >
-                <Square size={15} />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
       </main>
       <Footer />
     </>

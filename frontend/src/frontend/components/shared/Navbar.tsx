@@ -7,7 +7,8 @@ import { useSession, signOut } from "next-auth/react";
 import { useLanguage } from "@/frontend/context/LanguageContext";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { Menu, X, ChevronDown, LogOut, Shield, Heart, Users, BookOpen, HandHeart, Calendar, MapPin, Briefcase } from "lucide-react";
+import { NotificationBell } from "./NotificationBell";
+import { Menu, X, ChevronDown, LogOut, Shield, Heart, Users, BookOpen, HandHeart, Calendar, MapPin, Briefcase, MessageSquareHeart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const Navbar: React.FC = () => {
@@ -37,6 +38,7 @@ export const Navbar: React.FC = () => {
       label: language === 'en' ? "Media" : "ሚዲያ",
       key: "media",
       items: [
+        { href: "/devotional", label: language === 'en' ? "Daily Devotional" : "የእለት ቃል", icon: <BookOpen size={16} />, show: true },
         { href: "/sermons", label: t("navSermons"), icon: <BookOpen size={16} />, show: true },
         { href: "/events", label: t("navEvents"), icon: <Calendar size={16} />, show: true },
         { href: "/gallery", label: t("navGallery"), icon: <Heart size={16} />, show: true },
@@ -46,6 +48,7 @@ export const Navbar: React.FC = () => {
       label: language === 'en' ? "Community Care" : "የማህበረሰብ እንክብካቤ",
       key: "community",
       items: [
+        { href: "/prayer", label: language === 'en' ? "Prayer Wall" : "የጸሎት ግድግዳ", icon: <MessageSquareHeart size={16} />, show: true },
         { href: "/mutual-aid", label: language === 'en' ? "Mutual Aid" : "የእርስ በእርስ እርዳታ", icon: <HandHeart size={16} />, show: !!session },
         { href: "/volunteer", label: language === 'en' ? "Volunteer Engine" : "በጎ ፈቃደኝነት", icon: <Users size={16} />, show: !!session },
         { href: "/mentorship", label: language === 'en' ? "Mentorship" : "የአማካሪነት አገልግሎት", icon: <Briefcase size={16} />, show: !!session && isApproved },
@@ -154,6 +157,7 @@ export const Navbar: React.FC = () => {
             <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-full border border-slate-200 dark:border-slate-800">
               <LanguageSwitcher />
               <ThemeToggle />
+              <NotificationBell />
             </div>
 
             {session ? (
