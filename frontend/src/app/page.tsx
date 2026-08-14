@@ -19,6 +19,7 @@ import {
   Image as ImageIcon 
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { TextRepel } from "@/components/ui/text-repel";
 
 export default function HomePage() {
   const { data: session } = useSession();
@@ -110,14 +111,25 @@ export default function HomePage() {
               📍 {language === 'en' ? 'Kale Hiywet Church Youth Fellowship' : 'የቃለ ህይወት ቤተክርስቲያን ወጣቶች ህብረት'}
             </motion.span>
             
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-gold-400 via-amber-200 to-white bg-clip-text text-transparent drop-shadow-sm">
-                {t("heroTitle")}
-              </span>
+            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight mb-6 leading-tight z-20 relative drop-shadow-2xl">
+              <TextRepel 
+                text={t("heroTitle")} 
+                className="inline-flex flex-wrap justify-center"
+                letterClassName="text-gold-400 hover:text-white transition-colors duration-300 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]"
+                radius={200}
+                strength={75}
+                stiffness={250}
+                damping={12}
+              />
             </h1>
-            <p className="text-lg sm:text-2xl font-light text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed">
-              {t("heroSubtitle")} — {t("heroMission")}
-            </p>
+            <div className="text-lg sm:text-xl font-light text-slate-300 max-w-4xl mx-auto mb-10 leading-relaxed z-20 relative">
+              <TextRepel 
+                text="yabbok fellowship    Youths Strong Fellowship Platform — Connecting youth across Kale Hiywet Churches in Ethiopia to grow spiritually, support one another in prayer, and share resources."
+                className="inline-flex justify-center"
+                radius={80}
+                strength={25}
+              />
+            </div>
 
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
