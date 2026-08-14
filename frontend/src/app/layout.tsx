@@ -3,6 +3,7 @@ import "./globals.css";
 import { LanguageProvider } from "@/frontend/context/LanguageContext";
 import { ThemeProvider } from "@/frontend/context/ThemeProvider";
 import { AuthProvider } from "@/frontend/context/AuthContext";
+import { Geist } from "next/font/google";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
