@@ -7,6 +7,8 @@ import { Navbar } from "@/frontend/components/shared/Navbar";
 import { Footer } from "@/frontend/components/shared/Footer";
 import { useLanguage } from "@/frontend/context/LanguageContext";
 import { Loader2, HeartHandshake, FileWarning, Inbox, Send, Activity, Lock, EyeOff } from "lucide-react";
+import { toast } from "sonner";
+import { Skeleton } from "@/frontend/components/ui/skeleton";
 
 export default function CounselingPage() {
   const { data: session, status } = useSession();
@@ -70,13 +72,13 @@ export default function CounselingPage() {
       });
 
       if (res.ok) {
-        alert("Your request has been securely submitted.");
+        toast.success(language === 'en' ? "Your request has been securely submitted." : "ጥያቄዎ በደህንነት ቀርቧል።");
         setFormData({ topic: "Spiritual", urgency: "Medium", description: "", isAnonymous: false });
         loadData();
         setActiveTab("my_requests");
       } else {
         const data = await res.json();
-        alert(data.error || "Failed to submit request.");
+        toast.error(data.error || (language === 'en' ? "Failed to submit request." : "ጥያቄ ማቅረብ አልተሳካም።"));
       }
     } catch (err) {
       console.error(err);
@@ -296,8 +298,14 @@ export default function CounselingPage() {
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="animate-spin text-indigo-500" size={32} />
+            <div className="max-w-2xl mx-auto space-y-4 py-6">
+              {[1, 2, 3].map((n) => (
+                <div key={n} className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/50 dark:border-slate-800/60 shadow-sm space-y-4">
+                  <Skeleton className="h-6 w-1/4 rounded-full" />
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-10 w-full rounded-xl" />
+                </div>
+              ))}
             </div>
           ) : (
             <div className="space-y-6">

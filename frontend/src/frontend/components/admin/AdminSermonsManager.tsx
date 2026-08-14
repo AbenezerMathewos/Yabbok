@@ -4,12 +4,15 @@ import { Loader2, Plus, Trash2, Video, Music, FileText, CheckCircle2 } from "luc
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { ConfirmModal } from "@/frontend/components/ui/ConfirmModal";
 
 export function AdminSermonsManager() {
   const { language } = useLanguage();
   const [sermons, setSermons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -52,28 +55,45 @@ export function AdminSermonsManager() {
       if (res.ok) {
         setFormData({ title: "", speaker: "", date: new Date().toISOString().slice(0, 10), description: "", audioUrl: "", videoUrl: "", notes: "" });
         fetchSermons();
+        toast.success(language === 'en' ? "Sermon created successfully!" : "ስብከቱ በተሳካ ሁኔታ ተፈጥሯል።");
       } else {
-        alert(language === 'en' ? "Failed to create sermon." : "ስብከት መፍጠር አልተሳካም።");
+        toast.error(language === 'en' ? "Failed to create sermon." : "ስብከት መፍጠር አልተሳካም።");
       }
     } catch (e) {
-      console.error(e);
+      toast.error(language === 'en' ? "An error occurred." : "ስህተት ተከስቷል።");
     } finally {
       setCreating(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(language === 'en' ? "Are you sure you want to delete this sermon?" : "ይህን ስብከት መሰረዝ እንደሚፈልጉ እርግጠኛ ነዎት?")) return;
+  const confirmDelete = async () => {
+    if (!deleteId) return;
     try {
-      const res = await fetch(`/api/sermons?id=${id}`, { method: "DELETE" });
-      if (res.ok) fetchSermons();
+      const res = await fetch(`/api/sermons?id=${deleteId}`, { method: "DELETE" });
+      if (res.ok) {
+        fetchSermons();
+        toast.success(language === 'en' ? "Sermon deleted." : "ስብከቱ ተሰርዟል።");
+      } else {
+        toast.error(language === 'en' ? "Failed to delete sermon." : "ስብከት መሰረዝ አልተሳካም።");
+      }
     } catch (e) {
-      console.error(e);
+      toast.error(language === 'en' ? "An error occurred." : "ስህተት ተከስቷል።");
+    } finally {
+      setDeleteId(null);
     }
   };
 
   return (
     <div className="space-y-6">
+      <ConfirmModal
+        isOpen={!!deleteId}
+        title={language === 'en' ? "Delete Sermon" : "ስብከት ሰርዝ"}
+        message={language === 'en' ? "Are you sure you want to delete this sermon? This action cannot be undone." : "ይህን ስብከት መሰረዝ እንደሚፈልጉ እርግጠኛ ነዎት? ይህ እርምጃ ሊመለስ አይችልም።"}
+        confirmText={language === 'en' ? "Delete" : "ሰርዝ"}
+        cancelText={language === 'en' ? "Cancel" : "ሰርዝ"}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteId(null)}
+      />
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-black">{language === 'en' ? 'Sermons Manager' : 'የስብከት አስተዳደር'}</h2>
       </div>
@@ -134,7 +154,7 @@ export function AdminSermonsManager() {
                     {s.notes && <span className="flex items-center gap-1 text-green-500"><FileText size={14}/> Text</span>}
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 hover:text-red-600" onClick={() => handleDelete(s._id)}>
+                <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 hover:text-red-600" onClick={() => setDeleteId(s._id)}>
                   <Trash2 size={16} />
                 </Button>
               </div>

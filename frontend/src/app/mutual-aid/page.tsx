@@ -6,6 +6,8 @@ import { Navbar } from '@/frontend/components/shared/Navbar';
 import { Footer } from '@/frontend/components/shared/Footer';
 import { HandHeart, PlusCircle } from 'lucide-react';
 import { useLanguage } from "@/frontend/context/LanguageContext";
+import { toast } from "sonner";
+import { Skeleton } from "@/frontend/components/ui/skeleton";
 
 export default function MutualAidPage() {
   const { language } = useLanguage();
@@ -42,8 +44,6 @@ export default function MutualAidPage() {
   };
 
   const handleHelp = async (postId: string) => {
-    if (!confirm(language === 'en' ? 'Are you sure you want to volunteer to help with this? The poster will be notified.' : 'በዚህ ላይ ለመርዳት ፈቃደኛ መሆንዎን እርግጠኛ ነዎት? ለለጠፈው ሰው ማሳወቂያ ይላካል።')) return;
-    
     try {
       const res = await fetch('/api/mutual-aid', {
         method: 'PATCH',
@@ -53,9 +53,12 @@ export default function MutualAidPage() {
       if (res.ok) {
         const updatedPost = await res.json();
         setPosts(posts.map(p => p._id === postId ? updatedPost : p));
+        toast.success(language === 'en' ? 'Thank you for offering to help!' : 'ስለረዱ እናመሰግናለን!');
+      } else {
+        toast.error(language === 'en' ? 'Failed to volunteer' : 'ማመልከት አልተቻለም');
       }
     } catch (error) {
-      console.error('Failed to update status:', error);
+      toast.error(language === 'en' ? 'An error occurred' : 'ስህተት ተከስቷል');
     }
   };
 
@@ -73,9 +76,12 @@ export default function MutualAidPage() {
         setPosts([newPost, ...posts]);
         setShowForm(false);
         setFormData({ type: 'need', category: 'meals', title: '', description: '' });
+        toast.success(language === 'en' ? 'Post created successfully!' : 'ልጥፉ በተሳካ ሁኔታ ተፈጥሯል!');
+      } else {
+        toast.error(language === 'en' ? 'Failed to create post' : 'ልጥፍ መፍጠር አልተቻለም');
       }
     } catch (error) {
-      console.error('Failed to create post:', error);
+      toast.error(language === 'en' ? 'An error occurred' : 'ስህተት ተከስቷል');
     } finally {
       setSubmitting(false);
     }
@@ -225,8 +231,21 @@ export default function MutualAidPage() {
 
         {/* Feed */}
         {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <div key={n} className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200/50 dark:border-gray-700/60 shadow-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-16 w-full" />
+                <div className="flex items-center justify-between pt-2">
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <Skeleton className="h-9 w-28 rounded-xl" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : filteredPosts.length === 0 ? (
           <div className="text-center py-20 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">

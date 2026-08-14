@@ -7,6 +7,8 @@ import { Navbar } from "@/frontend/components/shared/Navbar";
 import { Footer } from "@/frontend/components/shared/Footer";
 import { Loader2, Heart, ShieldAlert, CreditCard, CheckCircle, HandCoins, Building, Droplet, Pill, ShieldCheck, XCircle } from "lucide-react";
 import { useLanguage } from "@/frontend/context/LanguageContext";
+import { toast } from "sonner";
+import { Skeleton } from "@/frontend/components/ui/skeleton";
 
 export default function BenevolencePage() {
   const { language } = useLanguage();
@@ -82,13 +84,13 @@ export default function BenevolencePage() {
       });
 
       if (res.ok) {
-        alert("Your request for financial assistance has been securely submitted.");
+        toast.success(language === 'en' ? "Your request for financial assistance has been securely submitted." : "የገንዘብ እርዳታ ጥያቄዎ በደህንነት ቀርቧል።");
         setFormData({ amountRequested: "", category: "Housing/Rent", description: "" });
         loadData();
         setActiveTab("my_requests");
       } else {
         const data = await res.json();
-        alert(data.error || "Failed to submit request.");
+        toast.error(data.error || (language === 'en' ? "Failed to submit request." : "ጥያቄ ማቅረብ አልተሳካም።"));
       }
     } catch (err) {
       console.error(err);
@@ -205,8 +207,17 @@ export default function BenevolencePage() {
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="animate-spin text-purple-500" size={32} />
+            <div className="max-w-2xl mx-auto space-y-4 py-6">
+              {[1, 2, 3].map((n) => (
+                <div key={n} className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/50 dark:border-slate-800/60 shadow-sm space-y-4">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-6 w-1/4 rounded-full" />
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                  <Skeleton className="h-10 w-1/3" />
+                  <Skeleton className="h-16 w-full" />
+                </div>
+              ))}
             </div>
           ) : (
             <div className="space-y-6">

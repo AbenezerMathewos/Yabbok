@@ -7,6 +7,8 @@ import { Navbar } from "@/frontend/components/shared/Navbar";
 import { Footer } from "@/frontend/components/shared/Footer";
 import { Loader2, Users, Search, ClipboardList, Briefcase, Plus, CheckCircle, XCircle } from "lucide-react";
 import { useLanguage } from "@/frontend/context/LanguageContext";
+import { toast } from "sonner";
+import { Skeleton } from "@/frontend/components/ui/skeleton";
 
 export default function VolunteerPage() {
   const { language } = useLanguage();
@@ -85,13 +87,13 @@ export default function VolunteerPage() {
       });
 
       if (res.ok) {
-        alert(isLeader ? "Opportunity published successfully." : "Opportunity submitted for pastoral review!");
+        toast.success(language === 'en' ? "Submitted successfully!" : "በተሳካ ሁኔታ ቀርቧል!");
         setFormData({ title: "", description: "", skillsRequired: "", date: "", churchBranch: "" });
         setShowForm(false);
         loadData();
       } else {
         const data = await res.json();
-        alert(data.error || "Failed to create opportunity.");
+        toast.error(data.error || (language === 'en' ? "Failed to submit opportunity." : "እድሉን ማቅረብ አልተሳካም።"));
       }
     } catch (err) {
       console.error(err);
@@ -107,12 +109,11 @@ export default function VolunteerPage() {
       });
 
       if (res.ok) {
-        alert("Application submitted!");
-        setApplyNotes({ ...applyNotes, [opportunityId]: "" });
+        toast.success(language === 'en' ? "Application submitted!" : "ማመልከቻው ቀርቧል!");
         loadData();
       } else {
         const data = await res.json();
-        alert(data.error || "Failed to apply.");
+        toast.error(data.error || (language === 'en' ? "Application failed." : "ማመልከቻው አልተሳካም።"));
       }
     } catch (err) {
       console.error(err);
@@ -224,8 +225,15 @@ export default function VolunteerPage() {
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="animate-spin text-teal-500" size={32} />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-6">
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <div key={n} className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/50 dark:border-slate-800/60 shadow-sm space-y-4">
+                  <Skeleton className="h-6 w-1/3 rounded-full" />
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-10 w-full rounded-xl" />
+                </div>
+              ))}
             </div>
           ) : (
             <div className="space-y-6">

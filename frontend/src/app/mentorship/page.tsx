@@ -7,6 +7,8 @@ import { Navbar } from "@/frontend/components/shared/Navbar";
 import { Footer } from "@/frontend/components/shared/Footer";
 import { useLanguage } from "@/frontend/context/LanguageContext";
 import { Loader2, Users, UserPlus, BookOpen, ShieldCheck, CheckCircle, XCircle } from "lucide-react";
+import { toast } from "sonner";
+import { Skeleton } from "@/frontend/components/ui/skeleton";
 
 export default function MentorshipPage() {
   const { data: session, status } = useSession();
@@ -78,12 +80,12 @@ export default function MentorshipPage() {
         body: JSON.stringify({ mentorId, goals: [goals] })
       });
       if (res.ok) {
-        alert("Mentorship request sent successfully!");
+        toast.success(language === 'en' ? "Mentorship request sent successfully!" : "የምክር ጥያቄ በተሳካ ሁኔታ ተልኳል!");
         loadData();
         setActiveTab("connections");
       } else {
         const data = await res.json();
-        alert(data.error || "Failed to send request.");
+        toast.error(data.error || (language === 'en' ? "Failed to send request." : "ጥያቄ መላክ አልተሳካም።"));
       }
     } catch (err) {
       console.error(err);
@@ -98,10 +100,11 @@ export default function MentorshipPage() {
         body: JSON.stringify({ connectionId, status: connStatus })
       });
       if (res.ok) {
+        toast.success(language === 'en' ? "Connection updated!" : "ግንኙነቱ ተዘምኗል!");
         loadData();
       } else {
         const data = await res.json();
-        alert(data.error || "Update failed.");
+        toast.error(data.error || (language === 'en' ? "Update failed." : "ማዘመን አልተሳካም።"));
       }
     } catch (err) {
       console.error(err);
@@ -117,11 +120,11 @@ export default function MentorshipPage() {
         body: JSON.stringify(mentorForm)
       });
       if (res.ok) {
-        alert("Mentor profile updated! Pending admin approval.");
+        toast.success(language === 'en' ? "Mentor profile updated! Pending admin approval." : "የአማካሪ መገለጫ ተዘምኗል! የአስተዳዳሪ ማረጋገጫ በመጠባበቅ ላይ።");
         loadData();
       } else {
         const data = await res.json();
-        alert(data.error || "Registration failed.");
+        toast.error(data.error || (language === 'en' ? "Registration failed." : "ምዝገባ አልተሳካም።"));
       }
     } catch (err) {
       console.error(err);
@@ -209,8 +212,20 @@ export default function MentorshipPage() {
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="animate-spin text-gold-500" size={32} />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-6">
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <div key={n} className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/50 dark:border-slate-800/60 shadow-sm space-y-4">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="w-12 h-12 rounded-full" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-3 w-1/3" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-10 w-full rounded-xl" />
+                </div>
+              ))}
             </div>
           ) : (
             <>

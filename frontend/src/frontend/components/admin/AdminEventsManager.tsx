@@ -4,12 +4,15 @@ import { Loader2, Plus, Trash2, Calendar, MapPin, Image as ImageIcon, Video, Mic
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { ConfirmModal } from "@/frontend/components/ui/ConfirmModal";
 
 export function AdminEventsManager() {
   const { language } = useLanguage();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -53,28 +56,45 @@ export function AdminEventsManager() {
       if (res.ok) {
         setFormData({ title: "", description: "", category: "Youth Meeting", date: new Date().toISOString().slice(0, 10), location: "", photoAdUrl: "", videoAdUrl: "", voiceAdUrl: "" });
         fetchEvents();
+        toast.success(language === 'en' ? "Event created successfully!" : "ዝግጅቱ በተሳካ ሁኔታ ተፈጥሯል።");
       } else {
-        alert(language === 'en' ? "Failed to create event." : "ዝግጅት መፍጠር አልተሳካም።");
+        toast.error(language === 'en' ? "Failed to create event." : "ዝግጅት መፍጠር አልተሳካም።");
       }
     } catch (e) {
-      console.error(e);
+      toast.error(language === 'en' ? "An error occurred." : "ስህተት ተከስቷል።");
     } finally {
       setCreating(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(language === 'en' ? "Are you sure you want to delete this event?" : "ይህን ዝግጅት መሰረዝ እንደሚፈልጉ እርግጠኛ ነዎት?")) return;
+  const confirmDelete = async () => {
+    if (!deleteId) return;
     try {
-      const res = await fetch(`/api/events?id=${id}`, { method: "DELETE" });
-      if (res.ok) fetchEvents();
+      const res = await fetch(`/api/events?id=${deleteId}`, { method: "DELETE" });
+      if (res.ok) {
+        fetchEvents();
+        toast.success(language === 'en' ? "Event deleted." : "ዝግጅቱ ተሰርዟል።");
+      } else {
+        toast.error(language === 'en' ? "Failed to delete event." : "ዝግጅት መሰረዝ አልተሳካም።");
+      }
     } catch (e) {
-      console.error(e);
+      toast.error(language === 'en' ? "An error occurred." : "ስህተት ተከስቷል።");
+    } finally {
+      setDeleteId(null);
     }
   };
 
   return (
     <div className="space-y-6">
+      <ConfirmModal
+        isOpen={!!deleteId}
+        title={language === 'en' ? "Delete Event" : "ዝግጅት ሰርዝ"}
+        message={language === 'en' ? "Are you sure you want to delete this event? This action cannot be undone." : "ይህን ዝግጅት መሰረዝ እንደሚፈልጉ እርግጠኛ ነዎት? ይህ እርምጃ ሊመለስ አይችልም።"}
+        confirmText={language === 'en' ? "Delete" : "ሰርዝ"}
+        cancelText={language === 'en' ? "Cancel" : "ሰርዝ"}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteId(null)}
+      />
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-black">{language === 'en' ? 'Events Manager' : 'የዝግጅት አስተዳደር'}</h2>
       </div>
@@ -152,7 +172,7 @@ export function AdminEventsManager() {
                     {e.voiceAdUrl && <span className="flex items-center gap-1 text-green-500"><Mic size={14}/> Voice Ad</span>}
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 hover:text-red-600" onClick={() => handleDelete(e._id)}>
+                <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 hover:text-red-600" onClick={() => setDeleteId(e._id)}>
                   <Trash2 size={16} />
                 </Button>
               </div>
