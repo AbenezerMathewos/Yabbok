@@ -4,177 +4,219 @@ import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/frontend/context/LanguageContext";
 import { Navbar } from "@/frontend/components/shared/Navbar";
 import { Footer } from "@/frontend/components/shared/Footer";
-import { Play, Square, Loader2, Music, Video, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Play, Square, Loader2, Music, Video, FileText, ChevronDown, ChevronUp, BookOpen, Calendar } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+
+const fadeUp = (i = 0) => ({
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { delay: i * 0.07, duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+});
 
 export default function SermonsPage() {
   const { t, language } = useLanguage();
   const [sermons, setSermons] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Player state
   const [activeAudioUrl, setActiveAudioUrl] = useState<string | null>(null);
-  const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
+  const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [expandedNotesId, setExpandedNotesId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/sermons")
       .then((res) => res.json())
-      .then((data) => {
-        setSermons(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
+      .then((data) => { setSermons(data); setLoading(false); })
+      .catch(() => setLoading(false));
   }, []);
-
-  const toggleNotes = (id: string) => {
-    setExpandedNotesId(expandedNotesId === id ? null : id);
-  };
 
   return (
     <>
       <Navbar />
+      <main className="min-h-screen bg-background">
 
-      <main className="flex-grow bg-slate-50 dark:bg-slate-950 py-12 transition-colors duration-300">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white">
-              {t("navSermons")}
-            </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
-              {language === 'en' 
-                ? 'Listen to audio teachings, watch video sermons, and read study notes from YSF leaders.'
-                : 'የድምፅ ትምህርቶችን ያዳምጡ፣ የስብከት ቪዲዮዎችን ይመልከቱ እንዲሁም ከወጣቶች መሪዎች የተዘጋጁ ማስታወሻዎችን ያንብቡ።'}
-            </p>
-            <div className="h-1 w-12 bg-gold-500 rounded-full mx-auto mt-4"></div>
+        {/* ── Hero ── */}
+        <section className="relative py-24 bg-slate-900 overflow-hidden text-center">
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-gold-950/20" />
+          <div className="absolute inset-0 opacity-[0.04]"
+            style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "32px 32px" }} />
+          <div className="relative z-10 max-w-3xl mx-auto px-6">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-gold-400 text-xs font-bold uppercase tracking-widest mb-6">
+                <BookOpen size={14} />
+                {language === "en" ? "Word & Teaching" : "ቃልና ትምህርት"}
+              </div>
+              <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight mb-4">{t("navSermons")}</h1>
+              <p className="text-slate-400 text-lg font-medium max-w-xl mx-auto">
+                {language === "en"
+                  ? "Audio teachings, video sermons, and study notes from YSF leaders."
+                  : "ከወጣቶች መሪዎች የድምጽ ትምህርቶች፣ ቪዲዮ ስብከቶች፣ እና ማስታወሻዎች።"}
+              </p>
+            </motion.div>
           </div>
+        </section>
 
-          {/* Audio Bar Status (Sticky Player at bottom if active) */}
-          {activeAudioUrl && (
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-slate-900 text-white py-4 px-6 border-t border-gold-500/40 flex items-center justify-between shadow-2xl backdrop-blur-md">
-              <div className="flex items-center gap-3">
-                <Music className="text-gold-400 animate-bounce" size={20} />
-                <span className="text-xs font-semibold text-slate-200">
-                  {language === 'en' ? 'Now Playing Fellowship Audio Stream...' : 'የህብረት ትምህርት ድምጽ በመጫወት ላይ...'}
-                </span>
-              </div>
-              <div className="flex items-center gap-4">
-                <audio src={activeAudioUrl} autoPlay controls className="h-8 max-w-xs sm:max-w-sm rounded" />
-                <button
-                  onClick={() => setActiveAudioUrl(null)}
-                  className="p-1 rounded-lg bg-rose-500 text-white hover:bg-rose-600 transition-colors"
-                  title="Close player"
-                >
-                  <Square size={14} />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Loading */}
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14 pb-32">
           {loading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="animate-spin text-gold-500" size={36} />
+            <div className="flex flex-col items-center justify-center py-32 gap-4">
+              <Loader2 className="animate-spin text-primary" size={36} />
+              <p className="text-muted-foreground text-sm font-medium">{language === "en" ? "Loading sermons…" : "ስብከቶች እየተጫኑ ነው…"}</p>
             </div>
-          ) : sermons.length > 0 ? (
-            <div className="grid grid-cols-1 gap-8">
-              {sermons.map((sermon: any) => {
+          ) : sermons.length === 0 ? (
+            <div className="text-center py-24 bg-card border border-border/60 rounded-2xl">
+              <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-2xl flex items-center justify-center">
+                <BookOpen size={28} className="text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-black text-foreground mb-2">
+                {language === "en" ? "No sermons yet" : "ስብከቶች ገና አልተጫኑም"}
+              </h3>
+              <p className="text-muted-foreground font-medium">
+                {language === "en" ? "Check back soon — more are coming!" : "ብዙ ቦ ሲቀር ይምጡ!"}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {sermons.map((sermon: any, i: number) => {
+                const isVideoPlaying = activeVideoId === sermon._id;
                 const isNotesExpanded = expandedNotesId === sermon._id;
-                const isVideoPlaying = activeVideoUrl === sermon._id;
-
                 return (
-                  <div key={sermon._id} className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/60 shadow-sm transition-all duration-300">
-                    <div className="flex flex-col md:flex-row justify-between md:items-start gap-4">
-                      
-                      {/* Left Info */}
-                      <div>
-                        <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-bold bg-gold-500/10 text-gold-600 dark:text-gold-400 border border-gold-500/20">
-                          {sermon.category || "General"}
-                        </span>
-                        <h3 className="font-extrabold text-xl sm:text-2xl text-slate-950 dark:text-white mt-3 leading-snug">
-                          {sermon.title}
-                        </h3>
-                        <p className="text-sm text-gold-600 dark:text-gold-400 font-bold mt-1">
-                          🎤 {sermon.speaker}
-                        </p>
-                        <p className="text-xs text-slate-400 mt-0.5">
-                          📅 {new Date(sermon.date).toLocaleDateString(language, { dateStyle: "medium" })}
-                        </p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-4 leading-relaxed max-w-3xl">
-                          {sermon.description}
-                        </p>
-                      </div>
+                  <motion.div key={sermon._id} {...fadeUp(i)}
+                    className="bg-card border border-border/60 rounded-3xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-primary/30"
+                  >
+                    {/* Card body */}
+                    <div className="p-7">
+                      <div className="flex flex-col md:flex-row gap-5 md:items-start justify-between">
+                        {/* Left */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-3 flex-wrap">
+                            <Badge variant="outline" className="text-primary border-primary/30 font-bold text-[10px] uppercase tracking-wider">
+                              {sermon.category || "General"}
+                            </Badge>
+                            <span className="text-muted-foreground text-xs flex items-center gap-1 font-medium">
+                              <Calendar size={12} />
+                              {new Date(sermon.date).toLocaleDateString(language === "en" ? "en-US" : "am-ET", { dateStyle: "medium" })}
+                            </span>
+                          </div>
+                          <h3 className="font-black text-xl text-foreground leading-tight mb-2">{sermon.title}</h3>
+                          <p className="text-primary text-sm font-bold mb-3">🎤 {sermon.speaker}</p>
+                          <p className="text-muted-foreground text-sm leading-relaxed font-medium">{sermon.description}</p>
+                        </div>
 
-                      {/* Right Action buttons */}
-                      <div className="flex flex-wrap md:flex-col gap-2 shrink-0 justify-start md:justify-center md:items-end mt-2">
-                        {sermon.audioUrl && (
-                          <button
-                            onClick={() => {
-                              setActiveAudioUrl(sermon.audioUrl);
-                              setActiveVideoUrl(null);
-                            }}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-gold-500 hover:bg-gold-600 text-slate-950 text-xs font-bold rounded-xl transition-all shadow-sm"
-                          >
-                            <Play size={12} fill="currentColor" />
-                            <span>{language === 'en' ? 'Play Audio' : 'ድምጽ አጫውት'}</span>
-                          </button>
-                        )}
-                        {sermon.videoUrl && (
-                          <button
-                            onClick={() => {
-                              setActiveVideoUrl(isVideoPlaying ? null : sermon._id);
-                              setActiveAudioUrl(null);
-                            }}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 dark:bg-slate-800 hover:bg-slate-850 hover:text-gold-500 text-white text-xs font-semibold rounded-xl transition-all border border-slate-700/60"
-                          >
-                            <Video size={12} />
-                            <span>{isVideoPlaying ? (language === 'en' ? 'Close Video' : 'ቪዲዮ ዝጋ') : (language === 'en' ? 'Watch Video' : 'ቪዲዮ እይ')}</span>
-                          </button>
-                        )}
-                        <button
-                          onClick={() => toggleNotes(sermon._id)}
-                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-gold-500/10 hover:text-gold-600 text-xs font-semibold rounded-xl transition-all"
-                        >
-                          <FileText size={12} />
-                          <span>{language === 'en' ? 'Sermon Notes' : 'የስብከት ማስታወሻ'}</span>
-                          {isNotesExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                        </button>
+                        {/* Right actions */}
+                        <div className="flex flex-wrap md:flex-col gap-2 shrink-0">
+                          {sermon.audioUrl && (
+                            <button
+                              onClick={() => { setActiveAudioUrl(sermon.audioUrl === activeAudioUrl ? null : sermon.audioUrl); setActiveVideoId(null); }}
+                              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                                activeAudioUrl === sermon.audioUrl
+                                  ? "bg-destructive text-destructive-foreground"
+                                  : "bg-primary text-primary-foreground hover:bg-primary/90 shadow gold-glow"
+                              }`}
+                            >
+                              {activeAudioUrl === sermon.audioUrl ? <Square size={14} /> : <Play size={14} fill="currentColor" />}
+                              {activeAudioUrl === sermon.audioUrl
+                                ? (language === "en" ? "Stop" : "አቁም")
+                                : (language === "en" ? "Play Audio" : "ድምጽ አጫውት")}
+                            </button>
+                          )}
+                          {sermon.videoUrl && (
+                            <button
+                              onClick={() => { setActiveVideoId(isVideoPlaying ? null : sermon._id); setActiveAudioUrl(null); }}
+                              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all border ${
+                                isVideoPlaying
+                                  ? "bg-muted text-foreground border-border"
+                                  : "bg-card text-foreground border-border hover:border-primary/50 hover:text-primary"
+                              }`}
+                            >
+                              <Video size={14} />
+                              {isVideoPlaying ? (language === "en" ? "Close" : "ዝጋ") : (language === "en" ? "Watch Video" : "ቪዲዮ እይ")}
+                            </button>
+                          )}
+                          {sermon.notes && (
+                            <button
+                              onClick={() => setExpandedNotesId(isNotesExpanded ? null : sermon._id)}
+                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all border border-border"
+                            >
+                              <FileText size={14} />
+                              {language === "en" ? "Notes" : "ማስታወሻ"}
+                              {isNotesExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Collapsible Video stream */}
-                    {isVideoPlaying && sermon.videoUrl && (
-                      <div className="mt-6 rounded-2xl overflow-hidden aspect-video border border-slate-700/50 bg-black">
-                        <video src={sermon.videoUrl} controls autoPlay className="w-full h-full object-contain" />
-                      </div>
-                    )}
+                    {/* Video player */}
+                    <AnimatePresence>
+                      {isVideoPlaying && sermon.videoUrl && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="border-t border-border/50"
+                        >
+                          <div className="aspect-video bg-black">
+                            <video src={sermon.videoUrl} controls autoPlay className="w-full h-full object-contain" />
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
-                    {/* Collapsible Study Notes */}
-                    {isNotesExpanded && sermon.notes && (
-                      <div className="mt-6 p-5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/40 text-sm leading-relaxed text-slate-600 dark:text-slate-300 whitespace-pre-wrap shadow-inner">
-                        <h4 className="font-bold text-slate-900 dark:text-white mb-2 text-xs uppercase tracking-wider text-gold-500">
-                          {language === 'en' ? 'Study Summary / References' : 'የጥናት ማጠቃለያ እና ጥቅሶች'}
-                        </h4>
-                        {sermon.notes}
-                      </div>
-                    )}
-                  </div>
+                    {/* Study notes */}
+                    <AnimatePresence>
+                      {isNotesExpanded && sermon.notes && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="border-t border-border/50"
+                        >
+                          <div className="p-7 bg-muted/30">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-3">
+                              {language === "en" ? "Study Notes" : "የጥናት ማስታወሻ"}
+                            </p>
+                            <p className="text-sm text-foreground leading-loose whitespace-pre-wrap font-medium">{sermon.notes}</p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
                 );
               })}
             </div>
-          ) : (
-            <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/60">
-              <p className="text-slate-500 dark:text-slate-400">No sermons found.</p>
-            </div>
           )}
-
         </div>
-      </main>
 
+        {/* ── Sticky Audio Player ── */}
+        <AnimatePresence>
+          {activeAudioUrl && (
+            <motion.div
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 100, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-lg border-t border-primary/30 px-6 py-4 flex items-center justify-between gap-4 shadow-2xl"
+            >
+              <div className="flex items-center gap-3 shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Music size={18} className="text-primary animate-pulse" />
+                </div>
+                <div className="hidden sm:block">
+                  <p className="text-white text-xs font-black">{language === "en" ? "Now Playing" : "አሁን እየተጫወተ"}</p>
+                  <p className="text-slate-400 text-[10px] font-medium">{language === "en" ? "Fellowship Audio Stream" : "የህብረት ድምጽ"}</p>
+                </div>
+              </div>
+              <audio src={activeAudioUrl} autoPlay controls className="flex-1 h-9 max-w-md rounded-lg" />
+              <button
+                onClick={() => setActiveAudioUrl(null)}
+                className="w-9 h-9 rounded-xl bg-destructive/20 hover:bg-destructive/40 flex items-center justify-center text-destructive shrink-0 transition-all"
+              >
+                <Square size={15} />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+      </main>
       <Footer />
     </>
   );
