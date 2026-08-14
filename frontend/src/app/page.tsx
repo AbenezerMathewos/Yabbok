@@ -127,7 +127,9 @@ export default function HomePage() {
             </h1>
             <div className="text-lg sm:text-xl font-light text-slate-300 max-w-4xl mx-auto mb-10 leading-relaxed z-20 relative">
               <TextRepel 
-                text="yabbok fellowship    Youths Strong Fellowship Platform — Connecting youth across Kale Hiywet Churches in Ethiopia to grow spiritually, support one another in prayer, and share resources."
+                text={language === 'en' 
+                  ? "yabbok fellowship    Youths Strong Fellowship Platform — Connecting youth across Kale Hiywet Churches in Ethiopia to grow spiritually, support one another in prayer, and share resources." 
+                  : "ያቦቅ ህብረት    የወጣቶች ጠንካራ ህብረት መድረክ — የኢትዮጵያ ቃለ ህይወት አብያተ ክርስቲያናት ወጣቶችን በማገናኘት በመንፈሳዊ ለማደግ፣ በጸሎት ለመደጋገፍ እና ሃብት ለመለዋወጥ።"}
                 className="inline-flex justify-center"
                 radius={80}
                 strength={25}
@@ -184,7 +186,9 @@ export default function HomePage() {
 
         {/* MARQUEE */}
         <div className="py-8 border-y border-slate-200/50 dark:border-slate-800/50">
-          <InfiniteMarquee items={["Spiritual Growth", "Community", "Faith", "Fellowship", "Prayer", "Youth Leadership", "Service"]} />
+          <InfiniteMarquee items={language === 'en' 
+            ? ["Spiritual Growth", "Community", "Faith", "Fellowship", "Prayer", "Youth Leadership", "Service"]
+            : ["መንፈሳዊ ዕድገት", "ማህበረሰብ", "እምነት", "ህብረት", "ጸሎት", "የወጣቶች አመራር", "አገልግሎት"]} />
         </div>
 
         {/* BIBLE VERSE OF THE DAY */}
