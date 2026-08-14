@@ -17,8 +17,7 @@ export function OptimizedImage({ className, fallbackBlur = true, ...props }: Opt
         {...props}
         className={cn(
           "object-cover duration-700 ease-in-out w-full h-full",
-          isLoading ? "scale-110 blur-xl opacity-50" : "scale-100 blur-0 opacity-100",
-          props.className
+          isLoading ? "scale-110 blur-xl opacity-50" : "scale-100 blur-0 opacity-100"
         )}
         onLoad={() => setIsLoading(false)}
       />
