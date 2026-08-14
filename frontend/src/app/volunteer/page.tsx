@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import { Navbar } from "@/frontend/components/shared/Navbar";
 import { Footer } from "@/frontend/components/shared/Footer";
 import { Loader2, Users, Search, ClipboardList, Briefcase, Plus, CheckCircle, XCircle } from "lucide-react";
+import { useLanguage } from "@/frontend/context/LanguageContext";
 
 export default function VolunteerPage() {
+  const { language } = useLanguage();
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -171,10 +173,12 @@ export default function VolunteerPage() {
           <div className="text-center mb-10">
             <h1 className="text-3xl font-extrabold text-slate-950 dark:text-white flex items-center justify-center gap-3">
               <Users className="text-teal-500" size={32} />
-              Volunteer & Skills Mobilization
+              {language === 'en' ? 'Volunteer & Skills Mobilization' : 'የበጎ ፈቃደኞች እና የክህሎት ማስተባበሪያ'}
             </h1>
             <p className="mt-3 text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-              Use your God-given talents to serve the church and the community. Browse open opportunities or propose a new initiative.
+              {language === 'en' 
+                ? 'Use your God-given talents to serve the church and the community. Browse open opportunities or propose a new initiative.' 
+                : 'እግዚአብሔር የሰጠዎትን ተሰጥኦ ቤተክርስቲያንን እና ማህበረሰቡን ለማገልገል ይጠቀሙበት። ክፍት እድሎችን ያስሱ ወይም አዲስ አነሳሽነት ያቅርቡ።'}
             </p>
           </div>
 
@@ -187,7 +191,7 @@ export default function VolunteerPage() {
                   : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               }`}
             >
-              <Search size={16} /> Browse Opportunities
+              <Search size={16} /> {language === 'en' ? 'Browse Opportunities' : 'እድሎችን ያስሱ'}
             </button>
             <button
               onClick={() => setActiveTab("my_apps")}
@@ -197,7 +201,7 @@ export default function VolunteerPage() {
                   : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               }`}
             >
-              <ClipboardList size={16} /> My Applications
+              <ClipboardList size={16} /> {language === 'en' ? 'My Applications' : 'የእኔ ማመልከቻዎች'}
             </button>
             
             {isLeader && (
@@ -209,7 +213,7 @@ export default function VolunteerPage() {
                     : "bg-white dark:bg-slate-900 border border-teal-200 dark:border-teal-900/50 text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20"
                 }`}
               >
-                <Briefcase size={16} /> Manage Mobilization
+                <Briefcase size={16} /> {language === 'en' ? 'Manage Mobilization' : 'ማስተባበሪያ አስተዳድር'}
                 {(pendingOpps.length > 0 || allApplications.filter(a => a.status === 'pending').length > 0) && (
                   <span className="w-5 h-5 flex items-center justify-center rounded-full bg-white text-teal-700 text-[10px]">
                     {pendingOpps.length + allApplications.filter(a => a.status === 'pending').length}
@@ -235,14 +239,14 @@ export default function VolunteerPage() {
                       className="px-4 py-2 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold rounded-xl text-xs flex items-center gap-2 hover:bg-slate-800 dark:hover:bg-white"
                     >
                       {showForm ? <XCircle size={16} /> : <Plus size={16} />}
-                      {showForm ? "Cancel" : (isLeader ? "Create Opportunity" : "Suggest an Opportunity")}
+                      {showForm ? (language === 'en' ? "Cancel" : "ሰርዝ") : (isLeader ? (language === 'en' ? "Create Opportunity" : "እድል ፍጠር") : (language === 'en' ? "Suggest an Opportunity" : "እድል ሀሳብ አቅርብ"))}
                     </button>
                   </div>
 
                   {showForm && (
                     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/60 p-6 shadow-sm mb-6 max-w-2xl mx-auto">
                       <h3 className="font-extrabold text-base mb-4 text-slate-900 dark:text-white">
-                        {isLeader ? "Create Official Opportunity" : "Propose a Volunteer Opportunity"}
+                        {isLeader ? (language === 'en' ? "Create Official Opportunity" : "ይፋዊ እድል ፍጠር") : (language === 'en' ? "Propose a Volunteer Opportunity" : "የበጎ ፈቃድ እድል ያቅርቡ")}
                       </h3>
                       {!isLeader && (
                         <p className="text-xs text-slate-500 mb-4">
@@ -273,7 +277,7 @@ export default function VolunteerPage() {
                           </div>
                         </div>
                         <button type="submit" className="w-full py-3 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl text-xs">
-                          {isLeader ? "Publish Opportunity" : "Submit Proposal"}
+                          {isLeader ? (language === 'en' ? "Publish Opportunity" : "እድል አትም") : (language === 'en' ? "Submit Proposal" : "ሀሳቡን አስገባ")}
                         </button>
                       </form>
                     </div>
@@ -336,8 +340,8 @@ export default function VolunteerPage() {
                   {opportunities.length === 0 && !showForm && (
                     <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/60 shadow-sm">
                       <Search size={48} className="mx-auto text-slate-300 dark:text-slate-700 mb-4" />
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">No Opportunities Right Now</h3>
-                      <p className="text-xs text-slate-500">Check back later or propose a new way to serve.</p>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{language === 'en' ? 'No Opportunities Right Now' : 'በአሁኑ ጊዜ ምንም እድሎች የሉም'}</h3>
+                      <p className="text-xs text-slate-500">{language === 'en' ? 'Check back later or propose a new way to serve.' : 'በኋላ ተመልሰው ያረጋግጡ ወይም ለማገልገል አዲስ መንገድ ያቅርቡ።'}</p>
                     </div>
                   )}
                 </div>

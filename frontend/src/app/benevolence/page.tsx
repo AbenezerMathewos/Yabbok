@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import { Navbar } from "@/frontend/components/shared/Navbar";
 import { Footer } from "@/frontend/components/shared/Footer";
 import { Loader2, Heart, ShieldAlert, CreditCard, CheckCircle, HandCoins, Building, Droplet, Pill, ShieldCheck, XCircle } from "lucide-react";
+import { useLanguage } from "@/frontend/context/LanguageContext";
 
 export default function BenevolencePage() {
+  const { language } = useLanguage();
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -152,10 +154,12 @@ export default function BenevolencePage() {
           <div className="text-center mb-10">
             <h1 className="text-3xl font-extrabold text-slate-950 dark:text-white flex items-center justify-center gap-3">
               <ShieldCheck className="text-purple-500" size={32} />
-              Crisis Benevolence Fund
+              {language === 'en' ? 'Crisis Benevolence Fund' : 'የችግር ጊዜ በጎ አድራጎት ፈንድ'}
             </h1>
             <p className="mt-3 text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-              We are called to bear one another's burdens. If you are facing severe financial hardship, the church is here to help support you through this crisis.
+              {language === 'en'
+                ? "We are called to bear one another's burdens. If you are facing severe financial hardship, the church is here to help support you through this crisis."
+                : 'የእርስ በርሳችንን ሸክም እንድንሸከም ተጠርተናል። ከባድ የገንዘብ ችግር እያጋጠመዎት ከሆነ፣ ቤተክርስቲያን በዚህ ችግር ውስጥ እርስዎን ለመደገፍ እዚህ አለች።'}
             </p>
           </div>
 
@@ -168,7 +172,7 @@ export default function BenevolencePage() {
                   : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               }`}
             >
-              <Heart size={16} /> Request Assistance
+              <Heart size={16} /> {language === 'en' ? 'Request Assistance' : 'እርዳታ ይጠይቁ'}
             </button>
             <button
               onClick={() => setActiveTab("my_requests")}
@@ -178,7 +182,7 @@ export default function BenevolencePage() {
                   : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               }`}
             >
-              <CreditCard size={16} /> My Requests
+              <CreditCard size={16} /> {language === 'en' ? 'My Requests' : 'የእኔ ጥያቄዎች'}
             </button>
             
             {isLeader && (
@@ -190,7 +194,7 @@ export default function BenevolencePage() {
                     : "bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/50 text-purple-700 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
                 }`}
               >
-                <ShieldAlert size={16} /> Benevolence Board
+                <ShieldAlert size={16} /> {language === 'en' ? 'Benevolence Board' : 'የበጎ አድራጎት ቦርድ'}
                 {boardRequests.filter(r => r.status === 'pending' || r.status === 'reviewing').length > 0 && (
                   <span className="w-5 h-5 flex items-center justify-center rounded-full bg-white text-purple-700 text-[10px]">
                     {boardRequests.filter(r => r.status === 'pending' || r.status === 'reviewing').length}
@@ -314,8 +318,8 @@ export default function BenevolencePage() {
                   {myRequests.length === 0 && (
                     <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/60 shadow-sm">
                       <CreditCard size={48} className="mx-auto text-slate-300 dark:text-slate-700 mb-4" />
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">No Assistance Requests</h3>
-                      <p className="text-xs text-slate-500">You haven't requested any financial assistance.</p>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{language === 'en' ? 'No Assistance Requests' : 'ምንም የእርዳታ ጥያቄዎች የሉም'}</h3>
+                      <p className="text-xs text-slate-500">{language === 'en' ? "You haven't requested any financial assistance." : 'ምንም የገንዘብ እርዳታ አልጠየቁም።'}</p>
                     </div>
                   )}
                 </div>
@@ -423,8 +427,8 @@ export default function BenevolencePage() {
                   {boardRequests.length === 0 && (
                     <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/60 shadow-sm">
                       <ShieldAlert size={48} className="mx-auto text-slate-300 dark:text-slate-700 mb-4" />
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Board is Clear</h3>
-                      <p className="text-xs text-slate-500">No benevolence requests submitted.</p>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{language === 'en' ? 'Board is Clear' : 'ቦርድ ባዶ ነው'}</h3>
+                      <p className="text-xs text-slate-500">{language === 'en' ? 'No benevolence requests submitted.' : 'ምንም የበጎ አድራጎት ጥያቄዎች አልቀረቡም።'}</p>
                     </div>
                   )}
                 </div>

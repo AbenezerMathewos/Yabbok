@@ -11,7 +11,7 @@ import { Loader2, HeartHandshake, FileWarning, Inbox, Send, Activity, Lock, EyeO
 export default function CounselingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const user = session?.user as any;
   const isLeader = ['admin', 'super_admin', 'moderator', 'church_leader'].includes(user?.role);
@@ -242,10 +242,12 @@ export default function CounselingPage() {
           <div className="text-center mb-10">
             <h1 className="text-3xl font-extrabold text-slate-950 dark:text-white flex items-center justify-center gap-3">
               <HeartHandshake className="text-indigo-500" size={32} />
-              Pastoral Triage & Counseling
+              {language === 'en' ? 'Pastoral Triage & Counseling' : 'የፓስተር ምክር አገልግሎት'}
             </h1>
             <p className="mt-3 text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-              A secure, confidential space to request pastoral counseling, prayer support, or professional guidance for spiritual and life struggles.
+              {language === 'en'
+                ? 'A secure, confidential space to request pastoral counseling, prayer support, or professional guidance for spiritual and life struggles.'
+                : 'የፓስተር ምክር፣ የጸሎት ድጋፍ ወይም ለመንፈሳዊ እና ለሕይወት ትግሎች ሙያዊ መመሪያ ለመጠየቅ ደህንነቱ የተጠበቀ እና ሚስጥራዊ ቦታ።'}
             </p>
           </div>
 
@@ -259,7 +261,7 @@ export default function CounselingPage() {
               }`}
             >
               <HeartHandshake size={16} />
-              Get Help
+              {language === 'en' ? 'Get Help' : 'እርዳታ ያግኙ'}
             </button>
             <button
               onClick={() => setActiveTab("my_requests")}
@@ -270,7 +272,7 @@ export default function CounselingPage() {
               }`}
             >
               <Inbox size={16} />
-              My Requests Inbox
+              {language === 'en' ? 'My Requests Inbox' : 'የእኔ ጥያቄዎች መልእክት ሳጥን'}
             </button>
             
             {isLeader && (
@@ -283,7 +285,7 @@ export default function CounselingPage() {
                 }`}
               >
                 <Activity size={16} />
-                Pastoral Triage Queue
+                {language === 'en' ? 'Pastoral Triage Queue' : 'የፓስተር ጥያቄዎች ሰልፍ'}
                 {triageQueue.filter(q => q.status === 'open').length > 0 && (
                   <span className="w-5 h-5 flex items-center justify-center rounded-full bg-white text-rose-500 text-[10px]">
                     {triageQueue.filter(q => q.status === 'open').length}
@@ -392,8 +394,8 @@ export default function CounselingPage() {
                   ) : (
                     <div className="py-20 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/60 shadow-sm">
                       <Inbox size={48} className="mx-auto text-slate-300 dark:text-slate-700 mb-4" />
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">No Open Requests</h3>
-                      <p className="text-xs text-slate-500">Your secure inbox is empty.</p>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{language === 'en' ? 'No Open Requests' : 'ምንም ክፍት ጥያቄዎች የሉም'}</h3>
+                      <p className="text-xs text-slate-500">{language === 'en' ? 'Your secure inbox is empty.' : 'የእርስዎ ደህንነቱ የተጠበቀ የመልእክት ሳጥን ባዶ ነው።'}</p>
                     </div>
                   )}
                 </div>
@@ -417,8 +419,8 @@ export default function CounselingPage() {
                   ) : (
                     <div className="py-20 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/60 shadow-sm">
                       <Activity size={48} className="mx-auto text-slate-300 dark:text-slate-700 mb-4" />
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Queue Empty</h3>
-                      <p className="text-xs text-slate-500">There are no pending counseling requests.</p>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{language === 'en' ? 'Queue Empty' : 'ሰልፍ ባዶ ነው'}</h3>
+                      <p className="text-xs text-slate-500">{language === 'en' ? 'There are no pending counseling requests.' : 'ምንም በመጠባበቅ ላይ ያሉ የምክር ጥያቄዎች የሉም።'}</p>
                     </div>
                   )}
                 </div>

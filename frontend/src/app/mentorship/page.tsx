@@ -11,7 +11,7 @@ import { Loader2, Users, UserPlus, BookOpen, ShieldCheck, CheckCircle, XCircle }
 export default function MentorshipPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const user = session?.user as any;
   const [activeTab, setActiveTab] = useState<"find" | "connections" | "become">("find");
@@ -157,10 +157,12 @@ export default function MentorshipPage() {
           {/* Header */}
           <div className="text-center mb-10">
             <h1 className="text-3xl font-extrabold text-slate-950 dark:text-white">
-              Spiritual Mentorship Matchmaking
+              {language === 'en' ? 'Spiritual Mentorship Matchmaking' : 'መንፈሳዊ የምክር እና የማስተማር አገልግሎት'}
             </h1>
             <p className="mt-3 text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-              Connect with mature church members for spiritual guidance, career advice, and life coaching based on biblical principles.
+              {language === 'en' 
+                ? 'Connect with mature church members for spiritual guidance, career advice, and life coaching based on biblical principles.' 
+                : 'በመጽሐፍ ቅዱሳዊ መርሆዎች ላይ የተመሠረተ መንፈሳዊ መመሪያ፣ የሙያ ምክር እና የሕይወት ስልጠና ለማግኘት ከበሰሉ የቤተክርስቲያን አባላት ጋር ይገናኙ።'}
             </p>
           </div>
 
@@ -175,7 +177,7 @@ export default function MentorshipPage() {
               }`}
             >
               <Users size={16} />
-              Find a Mentor
+              {language === 'en' ? 'Find a Mentor' : 'አማካሪ ያግኙ'}
             </button>
             <button
               onClick={() => setActiveTab("connections")}
@@ -186,7 +188,7 @@ export default function MentorshipPage() {
               }`}
             >
               <ShieldCheck size={16} />
-              My Connections
+              {language === 'en' ? 'My Connections' : 'የእኔ ግንኙነቶች'}
               {connections.filter(c => c.status === "pending" && c.mentorId?._id === user?.id).length > 0 && (
                 <span className="w-5 h-5 flex items-center justify-center rounded-full bg-rose-500 text-white text-[10px]">
                   {connections.filter(c => c.status === "pending" && c.mentorId?._id === user?.id).length}
@@ -202,7 +204,7 @@ export default function MentorshipPage() {
               }`}
             >
               <UserPlus size={16} />
-              Become a Mentor
+              {language === 'en' ? 'Become a Mentor' : 'አማካሪ ይሁኑ'}
             </button>
           </div>
 
@@ -266,8 +268,8 @@ export default function MentorshipPage() {
                   ) : (
                     <div className="col-span-full py-20 text-center">
                       <Users size={48} className="mx-auto text-slate-300 dark:text-slate-700 mb-4" />
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">No Mentors Available</h3>
-                      <p className="text-xs text-slate-500">Check back later or become the first mentor!</p>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{language === 'en' ? 'No Mentors Available' : 'ምንም አማካሪዎች አይገኙም'}</h3>
+                      <p className="text-xs text-slate-500">{language === 'en' ? 'Check back later or become the first mentor!' : 'በኋላ ተመልሰው ያረጋግጡ ወይም የመጀመሪያው አማካሪ ይሁኑ!'} </p>
                     </div>
                   )}
                 </div>
@@ -349,8 +351,8 @@ export default function MentorshipPage() {
                   ) : (
                     <div className="py-20 text-center">
                       <ShieldCheck size={48} className="mx-auto text-slate-300 dark:text-slate-700 mb-4" />
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">No Connections Yet</h3>
-                      <p className="text-xs text-slate-500">Go to "Find a Mentor" to request guidance.</p>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{language === 'en' ? 'No Connections Yet' : 'እስካሁን ምንም ግንኙነቶች የሉም'}</h3>
+                      <p className="text-xs text-slate-500">{language === 'en' ? 'Go to "Find a Mentor" to request guidance.' : 'መመሪያ ለመጠየቅ ወደ "አማካሪ ያግኙ" ይሂዱ።'}</p>
                     </div>
                   )}
                 </div>

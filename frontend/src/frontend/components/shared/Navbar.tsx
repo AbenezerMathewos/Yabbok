@@ -25,7 +25,7 @@ export const Navbar: React.FC = () => {
   // Grouped Navigation Data
   const navGroups = [
     {
-      label: "About Us",
+      label: language === 'en' ? "About Us" : "ስለ እኛ",
       key: "about",
       items: [
         { href: "/about", label: t("navAbout"), icon: <Users size={16} />, show: true },
@@ -34,7 +34,7 @@ export const Navbar: React.FC = () => {
       ],
     },
     {
-      label: "Media",
+      label: language === 'en' ? "Media" : "ሚዲያ",
       key: "media",
       items: [
         { href: "/sermons", label: t("navSermons"), icon: <BookOpen size={16} />, show: true },
@@ -43,14 +43,14 @@ export const Navbar: React.FC = () => {
       ],
     },
     {
-      label: "Community Care",
+      label: language === 'en' ? "Community Care" : "የማህበረሰብ እንክብካቤ",
       key: "community",
       items: [
-        { href: "/mutual-aid", label: "Mutual Aid", icon: <HandHeart size={16} />, show: !!session },
-        { href: "/volunteer", label: "Volunteer Engine", icon: <Users size={16} />, show: !!session },
-        { href: "/mentorship", label: "Mentorship", icon: <Briefcase size={16} />, show: !!session && isApproved },
-        { href: "/counseling", label: "Counseling", icon: <Heart size={16} />, show: !!session && isApproved },
-        { href: "/benevolence", label: "Benevolence Fund", icon: <Heart size={16} />, show: !!session },
+        { href: "/mutual-aid", label: language === 'en' ? "Mutual Aid" : "የእርስ በእርስ እርዳታ", icon: <HandHeart size={16} />, show: !!session },
+        { href: "/volunteer", label: language === 'en' ? "Volunteer Engine" : "በጎ ፈቃደኝነት", icon: <Users size={16} />, show: !!session },
+        { href: "/mentorship", label: language === 'en' ? "Mentorship" : "የአማካሪነት አገልግሎት", icon: <Briefcase size={16} />, show: !!session && isApproved },
+        { href: "/counseling", label: language === 'en' ? "Counseling" : "ምክር", icon: <Heart size={16} />, show: !!session && isApproved },
+        { href: "/benevolence", label: language === 'en' ? "Benevolence Fund" : "የበጎ አድራጎት ፈንድ", icon: <Heart size={16} />, show: !!session },
       ],
     }
   ];

@@ -67,19 +67,19 @@ export default function HomePage() {
   const mockedAnnouncements = [
     {
       title: language === "en" ? "Registration Open for National Conference" : "ለብሔራዊ ኮንፈረንስ ምዝገባ ተጀምሯል",
-      date: "June 02, 2026",
+      date: language === "en" ? "June 02, 2026" : "ሰኔ 02, 2026",
       desc: language === "en" 
         ? "Approved members can now register for the upcoming National Youth Conference in Addis Ababa." 
         : "የተረጋገጡ አባላት በአዲስ አበባ ለሚካሄደው ብሔራዊ የወጣቶች ኮንፈረንስ አሁን መመዝገብ ይችላሉ።",
-      badge: "Urgent",
+      badge: language === "en" ? "Urgent" : "አስቸኳይ",
     },
     {
       title: language === "en" ? "Weekly Global Fasting & Prayer Night" : "ሳምንታዊ አጠቃላይ የጾምና ጸሎት ሌሊት",
-      date: "May 30, 2026",
+      date: language === "en" ? "May 30, 2026" : "ግንቦት 30, 2026",
       desc: language === "en" 
         ? "Join us every Friday night online as we pray for the youth ministry revival across all KHC branches." 
         : "በሁሉም የቃለ ህይወት ቅርንጫፎች ላሉ የወጣቶች አገልግሎት መነቃቃት በየሳምንቱ አርብ ምሽት በኦንላይን አብረን እንጸልይ።",
-      badge: "Regular",
+      badge: language === "en" ? "Regular" : "መደበኛ",
     },
   ];
 
@@ -351,7 +351,7 @@ export default function HomePage() {
                   className="p-8 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/60 shadow-sm relative overflow-hidden group hover:shadow-lg transition-all"
                 >
                   <span className={`absolute top-0 right-0 px-4 py-1.5 rounded-bl-2xl text-xs font-black uppercase tracking-wider text-white ${
-                    ann.badge === "Urgent" ? "bg-rose-500" : "bg-gold-500"
+                    ann.badge === "Urgent" || ann.badge === "አስቸኳይ" ? "bg-rose-500" : "bg-gold-500"
                   }`}>
                     {ann.badge}
                   </span>
@@ -411,7 +411,12 @@ export default function HomePage() {
                         </div>
                         <div className="relative z-10">
                           <span className="text-[10px] uppercase font-black tracking-widest text-gold-500 bg-gold-500/10 px-2 py-1 rounded-full">
-                            {event.category}
+                            {event.category === 'Youth Meeting' && language === 'am' ? 'የወጣቶች ስብሰባ' : 
+                             event.category === 'Conference' && language === 'am' ? 'ኮንፈረንስ' :
+                             event.category === 'Prayer Night' && language === 'am' ? 'የጸሎት ሌሊት' :
+                             event.category === 'Retreat' && language === 'am' ? 'የዕረፍት ጊዜ' :
+                             event.category === 'Bible Study' && language === 'am' ? 'የመጽሐፍ ቅዱስ ጥናት' :
+                             event.category}
                           </span>
                           <h3 className="font-bold text-lg text-white mt-3 mb-2 group-hover:text-gold-100 transition-colors">
                             {event.title}
@@ -425,7 +430,7 @@ export default function HomePage() {
                             </span>
                             {event.isLive && (
                               <span className="flex items-center gap-1 text-emerald-400 bg-emerald-900/30 border border-emerald-500/20 px-2 py-1 rounded-md uppercase tracking-wider text-[10px] shadow-[0_0_10px_rgba(52,211,153,0.1)]">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live ({event.livePlatform})
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> {language === 'en' ? 'Live' : 'ቀጥታ'} ({event.livePlatform})
                               </span>
                             )}
                           </div>
@@ -433,7 +438,7 @@ export default function HomePage() {
                       </motion.div>
                     ))
                   ) : (
-                    <p className="text-sm text-slate-400 italic bg-white dark:bg-slate-900 p-6 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">{t("dashNoEvents")}</p>
+                    <p className="text-sm text-slate-400 italic bg-white dark:bg-slate-900 p-6 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">{language === 'en' ? 'No events uploaded yet.' : 'ምንም ዝግጅቶች አልተሰቀሉም።'}</p>
                   )}
                 </div>
               </motion.div>
@@ -484,7 +489,7 @@ export default function HomePage() {
                       </motion.div>
                     ))
                   ) : (
-                    <p className="text-sm text-slate-400 italic bg-white dark:bg-slate-900 p-6 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">No sermons uploaded yet.</p>
+                    <p className="text-sm text-slate-400 italic bg-white dark:bg-slate-900 p-6 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">{language === 'en' ? 'No sermons uploaded yet.' : 'ምንም ስብከቶች አልተሰቀሉም።'}</p>
                   )}
                 </div>
               </motion.div>
@@ -598,7 +603,7 @@ export default function HomePage() {
                   </motion.div>
                 ))
               ) : (
-                <p className="text-sm text-slate-400 italic">No churches found.</p>
+                <p className="text-sm text-slate-400 italic">{language === 'en' ? 'No churches found.' : 'ምንም አብያተ ክርስቲያናት አልተገኙም።'}</p>
               )}
             </div>
             

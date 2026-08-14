@@ -23,11 +23,16 @@ import { AdminModerationQueue } from "@/frontend/components/admin/AdminModeratio
 import { AdminAnnouncementsManager } from "@/frontend/components/admin/AdminAnnouncementsManager";
 import { AdminSuggestionsManager } from "@/frontend/components/admin/AdminSuggestionsManager";
 import { AdminAuditLogs } from "@/frontend/components/admin/AdminAuditLogs";
+import { AdminSermonsManager } from "@/frontend/components/admin/AdminSermonsManager";
+import { AdminEventsManager } from "@/frontend/components/admin/AdminEventsManager";
+import { Video, Calendar } from "lucide-react";
 
 const TAB_LABELS: Record<string, { en: string; am: string; icon: any }> = {
   analytics:     { en: "Stats & Analytics", am: "ስታቲስቲክስ", icon: Activity },
   users:         { en: "Member Management", am: "አባላት", icon: Users },
   churches:      { en: "Church Network", am: "አብያተ ክርስቲያናት", icon: MapPin },
+  sermons:       { en: "Sermons Manager", am: "ስብከት", icon: Video },
+  events:        { en: "Events Manager", am: "ዝግጅቶች", icon: Calendar },
   gallery:       { en: "Gallery Manager", am: "ፎቶዎች", icon: ImageIcon },
   moderation:    { en: "Moderation Queue", am: "ቁጥጥር", icon: AlertTriangle },
   suggestions:   { en: "Suggestions", am: "ሃሳቦች", icon: FileText },
@@ -169,6 +174,8 @@ export default function AdminPage() {
               {activeSubTab === "analytics" && <AdminAnalytics />}
               {activeSubTab === "users" && <AdminUsersManager currentUserRole={user.role} />}
               {activeSubTab === "churches" && <AdminChurchesManager canManageChurches={canManageChurches} canApproveChurches={canApproveChurches} />}
+              {activeSubTab === "sermons" && <AdminSermonsManager />}
+              {activeSubTab === "events" && <AdminEventsManager />}
               {activeSubTab === "gallery" && <AdminGalleryManager />}
               {activeSubTab === "moderation" && <AdminModerationQueue currentUserRole={user.role} />}
               {activeSubTab === "suggestions" && <AdminSuggestionsManager />}

@@ -5,8 +5,10 @@ import AidCard from '@/frontend/components/community/AidCard';
 import { Navbar } from '@/frontend/components/shared/Navbar';
 import { Footer } from '@/frontend/components/shared/Footer';
 import { HandHeart, PlusCircle } from 'lucide-react';
+import { useLanguage } from "@/frontend/context/LanguageContext";
 
 export default function MutualAidPage() {
+  const { language } = useLanguage();
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'need' | 'offer'>('all');
@@ -40,7 +42,7 @@ export default function MutualAidPage() {
   };
 
   const handleHelp = async (postId: string) => {
-    if (!confirm('Are you sure you want to volunteer to help with this? The poster will be notified.')) return;
+    if (!confirm(language === 'en' ? 'Are you sure you want to volunteer to help with this? The poster will be notified.' : 'በዚህ ላይ ለመርዳት ፈቃደኛ መሆንዎን እርግጠኛ ነዎት? ለለጠፈው ሰው ማሳወቂያ ይላካል።')) return;
     
     try {
       const res = await fetch('/api/mutual-aid', {
@@ -92,10 +94,10 @@ export default function MutualAidPage() {
           <div className="flex-1 min-w-0">
             <h2 className="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate flex items-center">
               <HandHeart className="w-8 h-8 mr-3 text-orange-500" />
-              Mutual Aid Network
+              {language === 'en' ? 'Mutual Aid Network' : 'የእርስ በእርስ እርዳታ አውታረ መረብ'}
             </h2>
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              A place to ask for help when you need it, and offer your skills when you can.
+              {language === 'en' ? 'A place to ask for help when you need it, and offer your skills when you can.' : 'እርዳታ ሲፈልጉ የሚጠይቁበት እና ሲችሉ ችሎታዎን የሚያቀርቡበት ቦታ።'}
             </p>
           </div>
           <div className="mt-4 flex md:mt-0 md:ml-4">
@@ -104,7 +106,7 @@ export default function MutualAidPage() {
               className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               <PlusCircle className="w-5 h-5 mr-2" />
-              Create Post
+              {language === 'en' ? 'Create Post' : 'ልጥፍ ፍጠር'}
             </button>
           </div>
         </div>
@@ -117,9 +119,9 @@ export default function MutualAidPage() {
               value={filter}
               onChange={(e) => setFilter(e.target.value as any)}
             >
-              <option value="all">All Posts</option>
-              <option value="need">Needs</option>
-              <option value="offer">Offers</option>
+              <option value="all">{language === 'en' ? 'All Posts' : 'ሁሉም ልጥፎች'}</option>
+              <option value="need">{language === 'en' ? 'Needs' : 'ፍላጎቶች'}</option>
+              <option value="offer">{language === 'en' ? 'Offers' : 'ቅናሾች'}</option>
             </select>
           </div>
           <div className="hidden sm:block">
@@ -135,7 +137,11 @@ export default function MutualAidPage() {
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'}
                   `}
                 >
-                  {tab === 'all' ? 'All Posts' : `${tab}s`}
+                  {tab === 'all' 
+                    ? (language === 'en' ? 'All Posts' : 'ሁሉም ልጥፎች')
+                    : tab === 'need'
+                    ? (language === 'en' ? 'Needs' : 'ፍላጎቶች')
+                    : (language === 'en' ? 'Offers' : 'ቅናሾች')}
                 </button>
               ))}
             </nav>
@@ -145,56 +151,56 @@ export default function MutualAidPage() {
         {/* Form Modal / Dropdown */}
         {showForm && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Create a New Post</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{language === 'en' ? 'Create a New Post' : 'አዲስ ልጥፍ ፍጠር'}</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{language === 'en' ? 'Type' : 'ዓይነት'}</label>
                   <select 
                     value={formData.type} 
                     onChange={e => setFormData({...formData, type: e.target.value})}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   >
-                    <option value="need">I have a Need</option>
-                    <option value="offer">I am Offering Help</option>
+                    <option value="need">{language === 'en' ? 'I have a Need' : 'ፍላጎት አለኝ'}</option>
+                    <option value="offer">{language === 'en' ? 'I am Offering Help' : 'እርዳታ እያቀረብኩ ነው'}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{language === 'en' ? 'Category' : 'ምድብ'}</label>
                   <select 
                     value={formData.category} 
                     onChange={e => setFormData({...formData, category: e.target.value})}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   >
-                    <option value="meals">Meals / Food</option>
-                    <option value="transportation">Transportation / Rides</option>
-                    <option value="labor">Manual Labor / Repairs</option>
-                    <option value="prayer">Prayer / Counseling</option>
-                    <option value="financial">Financial Assistance</option>
-                    <option value="other">Other</option>
+                    <option value="meals">{language === 'en' ? 'Meals / Food' : 'ምግብ'}</option>
+                    <option value="transportation">{language === 'en' ? 'Transportation / Rides' : 'መጓጓዣ'}</option>
+                    <option value="labor">{language === 'en' ? 'Manual Labor / Repairs' : 'የጉልበት ሥራ / ጥገና'}</option>
+                    <option value="prayer">{language === 'en' ? 'Prayer / Counseling' : 'ጸሎት / ምክር'}</option>
+                    <option value="financial">{language === 'en' ? 'Financial Assistance' : 'የገንዘብ ድጋፍ'}</option>
+                    <option value="other">{language === 'en' ? 'Other' : 'ሌላ'}</option>
                   </select>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{language === 'en' ? 'Title' : 'ርዕስ'}</label>
                 <input 
                   type="text" 
                   required
                   value={formData.title} 
                   onChange={e => setFormData({...formData, title: e.target.value})}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  placeholder="E.g., Need a ride to church this Sunday"
+                  placeholder={language === 'en' ? 'E.g., Need a ride to church this Sunday' : 'ለምሳሌ፡ በዚህ እሁድ ወደ ቤተክርስቲያን መጓጓዣ እፈልጋለሁ'}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{language === 'en' ? 'Description' : 'መግለጫ'}</label>
                 <textarea 
                   required
                   rows={3}
                   value={formData.description} 
                   onChange={e => setFormData({...formData, description: e.target.value})}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  placeholder="Describe your need or what you are offering in detail..."
+                  placeholder={language === 'en' ? 'Describe your need or what you are offering in detail...' : 'ፍላጎትዎን ወይም የሚያቀርቡትን እርዳታ በዝርዝር ይግለጹ...'}
                 />
               </div>
               <div className="flex justify-end space-x-3">
@@ -203,14 +209,14 @@ export default function MutualAidPage() {
                   onClick={() => setShowForm(false)}
                   className="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
                 >
-                  Cancel
+                  {language === 'en' ? 'Cancel' : 'ሰርዝ'}
                 </button>
                 <button 
                   type="submit" 
                   disabled={submitting}
                   className="px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
                 >
-                  {submitting ? 'Posting...' : 'Post to Community'}
+                  {submitting ? (language === 'en' ? 'Posting...' : 'በመለጠፍ ላይ...') : (language === 'en' ? 'Post to Community' : 'ለማህበረሰብ ለጥፍ')}
                 </button>
               </div>
             </form>
@@ -225,9 +231,9 @@ export default function MutualAidPage() {
         ) : filteredPosts.length === 0 ? (
           <div className="text-center py-20 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
             <HandHeart className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No posts yet</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">{language === 'en' ? 'No posts yet' : 'ምንም ልጥፎች የሉም'}</h3>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Be the first to ask for help or offer your skills.
+              {language === 'en' ? 'Be the first to ask for help or offer your skills.' : 'እርዳታ በመጠየቅ ወይም ችሎታዎን በማቅረብ የመጀመሪያ ይሁኑ።'}
             </p>
           </div>
         ) : (
