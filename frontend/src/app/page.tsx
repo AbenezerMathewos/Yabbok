@@ -184,12 +184,7 @@ export default function HomePage() {
 
         {/* MARQUEE */}
         <div className="py-8 border-y border-slate-200/50 dark:border-slate-800/50">
-          <InfiniteMarquee />
-        </div>
-
-        {/* MARQUEE */}
-        <div className="py-8 border-y border-slate-200/50 dark:border-slate-800/50">
-          <InfiniteMarquee />
+          <InfiniteMarquee items={["Spiritual Growth", "Community", "Faith", "Fellowship", "Prayer", "Youth Leadership", "Service"]} />
         </div>
 
         {/* BIBLE VERSE OF THE DAY */}
