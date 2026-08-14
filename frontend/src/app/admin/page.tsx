@@ -24,7 +24,7 @@ import { AdminAnnouncementsManager } from "@/frontend/components/admin/AdminAnno
 import { AdminSuggestionsManager } from "@/frontend/components/admin/AdminSuggestionsManager";
 import { AdminAuditLogs } from "@/frontend/components/admin/AdminAuditLogs";
 
-const TAB_LABELS: Record<string, { en: string; am: string; icon: React.ElementType }> = {
+const TAB_LABELS: Record<string, { en: string; am: string; icon: any }> = {
   analytics:     { en: "Stats & Analytics", am: "ስታቲስቲክስ", icon: Activity },
   users:         { en: "Member Management", am: "አባላት", icon: Users },
   churches:      { en: "Church Network", am: "አብያተ ክርስቲያናት", icon: MapPin },
