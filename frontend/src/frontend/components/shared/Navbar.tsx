@@ -1,140 +1,222 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useLanguage } from "@/frontend/context/LanguageContext";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { Menu, X, Heart, Shield, LogOut, LayoutDashboard, User as UserIcon } from "lucide-react";
+import { Menu, X, ChevronDown, LogOut, Shield, Heart, Users, BookOpen, HandHeart, Calendar, MapPin, Briefcase } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { t, language } = useLanguage();
-  const [isOpen, setIsOpen] = useState(false);
+  
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   const user = session?.user as any;
   const isApproved = user?.status === "active";
   const role = user?.role;
 
-  const links = [
-    { href: "/", label: t("navHome"), show: true },
-    { href: "/about", label: t("navAbout"), show: true },
-    { href: "/churches", label: t("navChurches"), show: true },
-    { href: "/sermons", label: t("navSermons"), show: true },
-    { href: "/events", label: t("navEvents"), show: true },
-    { href: "/mutual-aid", label: "Mutual Aid", show: !!session },
-    { href: "/volunteer", label: "Volunteer Engine", show: !!session },
-    { href: "/benevolence", label: "Benevolence Fund", show: !!session },
-    { href: "/mentorship", label: "Mentorship", show: !!session && isApproved },
-    { href: "/counseling", label: "Counseling", show: !!session && isApproved },
-    { href: "/gallery", label: t("navGallery"), show: true },
-    { href: "/contact", label: t("navContact"), show: true },
-    { href: "/dashboard", label: t("navDashboard"), show: !!session && isApproved },
+  // Grouped Navigation Data
+  const navGroups = [
+    {
+      label: "About Us",
+      key: "about",
+      items: [
+        { href: "/about", label: t("navAbout"), icon: <Users size={16} />, show: true },
+        { href: "/churches", label: t("navChurches"), icon: <MapPin size={16} />, show: true },
+        { href: "/contact", label: t("navContact"), icon: <HandHeart size={16} />, show: true },
+      ],
+    },
+    {
+      label: "Media",
+      key: "media",
+      items: [
+        { href: "/sermons", label: t("navSermons"), icon: <BookOpen size={16} />, show: true },
+        { href: "/events", label: t("navEvents"), icon: <Calendar size={16} />, show: true },
+        { href: "/gallery", label: t("navGallery"), icon: <Heart size={16} />, show: true },
+      ],
+    },
+    {
+      label: "Community Care",
+      key: "community",
+      items: [
+        { href: "/mutual-aid", label: "Mutual Aid", icon: <HandHeart size={16} />, show: !!session },
+        { href: "/volunteer", label: "Volunteer Engine", icon: <Users size={16} />, show: !!session },
+        { href: "/mentorship", label: "Mentorship", icon: <Briefcase size={16} />, show: !!session && isApproved },
+        { href: "/counseling", label: "Counseling", icon: <Heart size={16} />, show: !!session && isApproved },
+        { href: "/benevolence", label: "Benevolence Fund", icon: <Heart size={16} />, show: !!session },
+      ],
+    }
   ];
 
+  const handleDropdownEnter = (key: string) => {
+    setActiveDropdown(key);
+  };
+
+  const handleDropdownLeave = () => {
+    setActiveDropdown(null);
+  };
+
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/60 shadow-sm transition-all duration-300">
+    <nav className="sticky top-0 z-50 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/60 shadow-sm transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex items-center justify-between h-20">
+          
           {/* Logo Section */}
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center gap-2 group">
-              <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-gold-500 text-white font-bold text-lg shadow-md group-hover:scale-105 transition-transform">
+          <div className="flex-shrink-0 flex items-center">
+            <Link href="/" className="flex items-center gap-3 group">
+              <motion.div 
+                whileHover={{ scale: 1.05, rotate: 5 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 text-white font-black text-xl shadow-lg shadow-gold-500/20"
+              >
                 Y
-              </span>
+              </motion.div>
               <div className="flex flex-col">
-                <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-gold-600 to-amber-500 bg-clip-text text-transparent group-hover:text-gold-500 transition-colors">
+                <span className="font-extrabold text-2xl tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent group-hover:text-gold-500 transition-colors duration-300">
                   {t("logoText")}
                 </span>
-                <span className={`text-[10px] text-slate-500 dark:text-slate-400 -mt-1 ${language === 'am' ? 'lang-am' : ''}`}>
+                <span className={`text-[10px] font-medium text-slate-500 dark:text-slate-400 -mt-1 tracking-wider uppercase ${language === 'am' ? 'lang-am' : ''}`}>
                   {t("logoSub")}
                 </span>
               </div>
             </Link>
           </div>
 
-          {/* Desktop Nav Items */}
-          <div className="hidden md:flex items-center gap-1.5 lg:gap-3">
-            {links
-              .filter((l) => l.show)
-              .map((link) => {
-                const isActive = pathname === link.href;
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                      isActive
-                        ? "bg-gold-500/10 text-gold-600 dark:text-gold-400 font-semibold"
-                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-100"
-                    } ${language === 'am' ? 'lang-am' : ''}`}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
+          {/* Desktop Navigation Centered */}
+          <div className="hidden md:flex flex-1 items-center justify-center gap-2 lg:gap-6">
+            <Link 
+              href="/" 
+              className={`px-4 py-2 rounded-full text-sm font-bold transition-all hover:bg-slate-100 dark:hover:bg-slate-900 ${pathname === '/' ? 'text-gold-500' : 'text-slate-700 dark:text-slate-200'}`}
+            >
+              {t("navHome")}
+            </Link>
 
-            {/* Admin link */}
-            {session && (role === "super_admin" || role === "moderator" || role === "church_leader") && (
-              <Link
-                href="/admin"
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium border border-gold-500/30 bg-gold-500/5 text-gold-600 dark:text-gold-400 hover:bg-gold-500 hover:text-white transition-all ${
-                  pathname === "/admin" ? "bg-gold-500 text-white font-semibold" : ""
-                } ${language === 'am' ? 'lang-am' : ''}`}
-              >
-                <Shield size={14} />
-                <span>{t("navAdmin")}</span>
-              </Link>
-            )}
+            {navGroups.map((group) => {
+              const hasVisibleItems = group.items.some(i => i.show);
+              if (!hasVisibleItems) return null;
+
+              const isGroupActive = group.items.some(i => pathname === i.href);
+
+              return (
+                <div 
+                  key={group.key}
+                  className="relative group h-20 flex items-center"
+                  onMouseEnter={() => handleDropdownEnter(group.key)}
+                  onMouseLeave={handleDropdownLeave}
+                >
+                  <button className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all hover:bg-slate-100 dark:hover:bg-slate-900 ${isGroupActive ? 'text-gold-500' : 'text-slate-700 dark:text-slate-200'}`}>
+                    {group.label}
+                    <ChevronDown size={14} className={`transition-transform duration-300 ${activeDropdown === group.key ? 'rotate-180 text-gold-500' : ''}`} />
+                  </button>
+
+                  <AnimatePresence>
+                    {activeDropdown === group.key && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="absolute top-[70px] left-1/2 -translate-x-1/2 w-64 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden py-2"
+                      >
+                        {group.items.filter(i => i.show).map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className={`flex items-center gap-3 px-4 py-3 mx-2 rounded-xl transition-all ${
+                              pathname === item.href 
+                                ? "bg-gold-500/10 text-gold-600 dark:text-gold-400 font-bold" 
+                                : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-medium"
+                            }`}
+                          >
+                            <div className={`p-2 rounded-lg ${pathname === item.href ? 'bg-gold-500/20' : 'bg-slate-100 dark:bg-slate-800'}`}>
+                              {item.icon}
+                            </div>
+                            {item.label}
+                          </Link>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Right Action buttons */}
-          <div className="hidden md:flex items-center gap-3">
-            <LanguageSwitcher />
-            <ThemeToggle />
+          {/* Right Actions */}
+          <div className="hidden md:flex items-center gap-4">
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-full border border-slate-200 dark:border-slate-800">
+              <LanguageSwitcher />
+              <ThemeToggle />
+            </div>
 
             {session ? (
-              <div className="flex items-center gap-2 border-l border-slate-200 dark:border-slate-800 pl-3">
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-1.5 hover:text-gold-500 transition-colors"
-                >
+              <div 
+                className="relative flex items-center gap-3 border-l border-slate-200 dark:border-slate-800 pl-4 h-8"
+                onMouseEnter={() => handleDropdownEnter("user")}
+                onMouseLeave={handleDropdownLeave}
+              >
+                <button className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                   {user.profilePhoto ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={user.profilePhoto}
-                      alt={user.name}
-                      className="w-8 h-8 rounded-full border border-gold-500 object-cover"
-                    />
+                    <img src={user.profilePhoto} alt={user.name} className="w-10 h-10 rounded-full border-2 border-gold-500 object-cover shadow-sm" />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-gold-500 text-white flex items-center justify-center text-xs font-bold shadow-inner">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 text-white flex items-center justify-center font-bold shadow-sm">
                       {user.name?.charAt(0).toUpperCase()}
                     </div>
                   )}
-                </Link>
-                <button
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                  className="p-2 rounded-lg text-slate-500 hover:text-rose-500 hover:bg-rose-500/5 dark:text-slate-400 transition-all"
-                  title={t("btnLogout")}
-                >
-                  <LogOut size={18} />
                 </button>
+
+                <AnimatePresence>
+                  {activeDropdown === "user" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-[40px] right-0 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden py-2"
+                    >
+                      <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 mb-2">
+                        <p className="font-bold text-slate-900 dark:text-white truncate">{user.name}</p>
+                        <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                      </div>
+
+                      {isApproved && (
+                        <Link href="/dashboard" className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+                          <Users size={16} className="text-slate-400" /> {t("navDashboard")}
+                        </Link>
+                      )}
+
+                      {(role === "super_admin" || role === "moderator" || role === "church_leader") && (
+                        <Link href="/admin" className="flex items-center gap-3 px-4 py-2 text-sm font-bold text-gold-600 dark:text-gold-400 hover:bg-gold-500/10">
+                          <Shield size={16} /> {t("navAdmin")}
+                        </Link>
+                      )}
+                      
+                      <div className="h-px bg-slate-100 dark:bg-slate-800 my-2 mx-4" />
+                      
+                      <button 
+                        onClick={() => signOut({ callbackUrl: "/" })}
+                        className="w-full flex items-center gap-3 px-4 py-2 text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10"
+                      >
+                        <LogOut size={16} /> {t("btnLogout")}
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
-              <div className="flex items-center gap-2 border-l border-slate-200 dark:border-slate-800 pl-3">
-                <Link
-                  href="/login"
-                  className={`px-3.5 py-1.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-gold-500 dark:hover:text-gold-400 transition-colors ${language === 'am' ? 'lang-am' : ''}`}
-                >
+              <div className="flex items-center gap-3 border-l border-slate-200 dark:border-slate-800 pl-4 h-8">
+                <Link href="/login" className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-gold-500 dark:hover:text-gold-400 transition-colors">
                   {t("btnLogin")}
                 </Link>
-                <Link
-                  href="/register"
-                  className={`px-4 py-1.5 text-sm font-semibold text-white bg-gold-500 hover:bg-gold-600 rounded-lg shadow-sm hover:shadow transition-all ${language === 'am' ? 'lang-am' : ''}`}
-                >
+                <Link href="/register" className="px-5 py-2 text-sm font-bold text-slate-900 bg-gold-500 hover:bg-gold-400 rounded-full shadow-lg shadow-gold-500/30 transition-all hover:-translate-y-0.5">
                   {t("btnRegister")}
                 </Link>
               </div>
@@ -143,106 +225,90 @@ export const Navbar: React.FC = () => {
 
           {/* Mobile menu trigger */}
           <div className="flex items-center gap-2 md:hidden">
-            <LanguageSwitcher />
-            <ThemeToggle />
             <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+              onClick={() => setIsMobileOpen(!isMobileOpen)}
+              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-900"
             >
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Drawer menu */}
-      {isOpen && (
-        <div className="md:hidden border-t border-slate-200/50 dark:border-slate-800/60 bg-white dark:bg-slate-950 px-4 pt-2 pb-4 space-y-1 shadow-inner">
-          {links
-            .filter((l) => l.show)
-            .map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className={`block px-3 py-2 rounded-lg text-base font-medium transition-all ${
-                    isActive
-                      ? "bg-gold-500/10 text-gold-600 dark:text-gold-400 font-semibold"
-                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900"
-                  } ${language === 'am' ? 'lang-am' : ''}`}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isMobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden border-t border-slate-200/50 dark:border-slate-800/60 bg-white dark:bg-slate-950 overflow-hidden shadow-2xl"
+          >
+            <div className="px-4 pt-4 pb-6 space-y-4 max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center gap-2 justify-center pb-4 border-b border-slate-100 dark:border-slate-800">
+                <LanguageSwitcher />
+                <ThemeToggle />
+              </div>
+              
+              <Link href="/" onClick={() => setIsMobileOpen(false)} className="block px-4 py-3 rounded-xl font-bold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-900">
+                {t("navHome")}
+              </Link>
 
-          {session && (role === "super_admin" || role === "moderator" || role === "church_leader") && (
-            <Link
-              href="/admin"
-              onClick={() => setIsOpen(false)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-base font-medium border border-gold-500/20 bg-gold-500/5 text-gold-600 dark:text-gold-400 ${
-                pathname === "/admin" ? "bg-gold-500 text-white" : ""
-              } ${language === 'am' ? 'lang-am' : ''}`}
-            >
-              <Shield size={16} />
-              <span>{t("navAdmin")}</span>
-            </Link>
-          )}
+              {navGroups.map((group) => {
+                const visibleItems = group.items.filter(i => i.show);
+                if (visibleItems.length === 0) return null;
 
-          {session ? (
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between px-3">
-              <Link
-                href="/dashboard"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2 text-slate-700 dark:text-slate-200"
-              >
-                {user.profilePhoto ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={user.profilePhoto}
-                    alt={user.name}
-                    className="w-8 h-8 rounded-full border border-gold-500 object-cover"
-                  />
+                return (
+                  <div key={group.key} className="space-y-1">
+                    <p className="px-4 text-xs font-black text-slate-400 uppercase tracking-widest mt-4 mb-2">{group.label}</p>
+                    {visibleItems.map(item => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsMobileOpen(false)}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium ${
+                          pathname === item.href ? 'bg-gold-500/10 text-gold-600 dark:text-gold-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900'
+                        }`}
+                      >
+                        {item.icon} {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                );
+              })}
+
+              <div className="pt-6 mt-6 border-t border-slate-100 dark:border-slate-800">
+                {session ? (
+                  <div className="space-y-2">
+                    {isApproved && (
+                      <Link href="/dashboard" onClick={() => setIsMobileOpen(false)} className="block px-4 py-3 rounded-xl font-bold text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-900 text-center">
+                        {t("navDashboard")}
+                      </Link>
+                    )}
+                    {(role === "super_admin" || role === "moderator" || role === "church_leader") && (
+                      <Link href="/admin" onClick={() => setIsMobileOpen(false)} className="block px-4 py-3 rounded-xl font-bold text-gold-600 dark:text-gold-400 bg-gold-500/10 text-center">
+                        {t("navAdmin")}
+                      </Link>
+                    )}
+                    <button onClick={() => { setIsMobileOpen(false); signOut({ callbackUrl: "/" }); }} className="w-full px-4 py-3 rounded-xl font-bold text-rose-600 bg-rose-50 dark:bg-rose-500/10">
+                      {t("btnLogout")}
+                    </button>
+                  </div>
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gold-500 text-white flex items-center justify-center text-xs font-bold">
-                    {user.name?.charAt(0).toUpperCase()}
+                  <div className="flex flex-col gap-3">
+                    <Link href="/login" onClick={() => setIsMobileOpen(false)} className="w-full text-center px-4 py-3 rounded-xl font-bold text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-900">
+                      {t("btnLogin")}
+                    </Link>
+                    <Link href="/register" onClick={() => setIsMobileOpen(false)} className="w-full text-center px-4 py-3 rounded-xl font-bold text-slate-900 bg-gold-500">
+                      {t("btnRegister")}
+                    </Link>
                   </div>
                 )}
-                <span className="font-semibold text-sm">{user.name}</span>
-              </Link>
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  signOut({ callbackUrl: "/" });
-                }}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-rose-500/20 text-rose-500 hover:bg-rose-500/5 font-semibold text-sm transition-all"
-              >
-                <LogOut size={14} />
-                <span>{t("btnLogout")}</span>
-              </button>
+              </div>
             </div>
-          ) : (
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-2">
-              <Link
-                href="/login"
-                onClick={() => setIsOpen(false)}
-                className={`w-full text-center px-4 py-2 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 font-semibold transition-all ${language === 'am' ? 'lang-am' : ''}`}
-              >
-                {t("btnLogin")}
-              </Link>
-              <Link
-                href="/register"
-                onClick={() => setIsOpen(false)}
-                className={`w-full text-center px-4 py-2 rounded-lg text-white bg-gold-500 hover:bg-gold-600 font-semibold shadow transition-all ${language === 'am' ? 'lang-am' : ''}`}
-              >
-                {t("btnRegister")}
-              </Link>
-            </div>
-          )}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };
