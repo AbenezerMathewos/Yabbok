@@ -89,7 +89,7 @@ export default function HomePage() {
 
       <main className="flex-grow">
         {/* HERO SECTION */}
-        <section className="relative overflow-hidden bg-slate-900 text-white py-24 sm:py-32">
+        <section className="relative overflow-hidden bg-transparent text-white py-24 sm:py-40">
           {/* Background image & gradient overlay */}
           <motion.div 
             initial={{ scale: 1.1, opacity: 0 }}
@@ -97,7 +97,7 @@ export default function HomePage() {
             transition={{ duration: 1.5, ease: "easeOut" }}
             className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1500&q=80')" }}
           />
-          <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/90 to-gold-950/40"></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/50 via-transparent to-gold-950/20"></div>
 
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
@@ -114,11 +114,11 @@ export default function HomePage() {
               📍 {language === 'en' ? 'Kale Hiywet Church Youth Fellowship' : 'የቃለ ህይወት ቤተክርስቲያን ወጣቶች ህብረት'}
             </motion.span>
             
-            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight mb-6 leading-tight z-20 relative drop-shadow-2xl">
+            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tighter mb-6 leading-tight z-20 relative drop-shadow-2xl">
               <TextRepel 
                 text={t("heroTitle")} 
                 className="inline-flex flex-wrap justify-center"
-                letterClassName="text-gold-400 hover:text-white transition-colors duration-300 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]"
+                letterClassName="bg-clip-text text-transparent bg-gradient-to-b from-white via-gold-200 to-gold-500 drop-shadow-[0_0_15px_rgba(250,204,21,0.3)] hover:text-white transition-colors duration-300"
                 radius={200}
                 strength={75}
                 stiffness={250}
@@ -280,7 +280,7 @@ export default function HomePage() {
         </section>
 
         {/* CORE VALUES */}
-        <section className="py-24 bg-white/20 dark:bg-slate-900/20">
+        <section className="py-24 bg-transparent">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
