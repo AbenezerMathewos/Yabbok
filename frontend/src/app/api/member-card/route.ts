@@ -12,7 +12,8 @@ export async function GET() {
       const user = await User.findById(userObj.id).populate("churchId", "name city region").lean();
       if (user) {
         return NextResponse.json({
-          memberId: `YABBOK-MEM-${String(user._id).substring(18).toUpperCase()}`,
+          // Use last 8 hex chars of ObjectId for a stable, collision-safe member ID
+          memberId: `YABBOK-${String(user._id).slice(-8).toUpperCase()}`,
           name: user.name,
           email: user.email,
           phone: user.phone,

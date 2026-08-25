@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import connectDB from './config/db';
 
@@ -35,8 +36,6 @@ app.use(
     credentials: true,
   })
 );
-
-import rateLimit from 'express-rate-limit';
 
 // ── Rate limiting ────────────────────────────────────────────────────────────
 // Global limiter: 200 requests per 15 minutes per IP
@@ -89,7 +88,7 @@ app.use('/api/gallery', galleryRouter);
 app.use('/api/insights', insightsRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/profile', profileRouter);
-app.use('/api/reports', reportRouter);
+app.use('/api/reports', reportsRouter);
 app.use('/api/sermons', sermonsRouter);
 app.use('/api/suggestions', suggestionsRouter);
 app.use('/api/testimonies', testimoniesRouter);

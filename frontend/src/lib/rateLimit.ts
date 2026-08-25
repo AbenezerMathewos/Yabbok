@@ -5,14 +5,12 @@ interface RateLimitEntry {
   resetAt: number;
 }
 
-// Module-level store — survives across requests in the same Node.js process.
+// Module-level store - survives across requests in the same Node.js process.
 // Resets on server restart. Upgrade to Redis for multi-instance production.
 const store = new Map<string, RateLimitEntry>();
 
 interface RateLimitOptions {
-  /** Time window in milliseconds */
   windowMs: number;
-  /** Maximum requests allowed within the window */
   max: number;
 }
 
@@ -30,7 +28,6 @@ export function rateLimit(
   const { windowMs, max } = options;
   const now = Date.now();
 
-  // Best-effort IP extraction — works with Vercel, Railway, and local dev.
   const forwarded = (req.headers as Headers).get("x-forwarded-for");
   const ip = forwarded ? forwarded.split(",")[0].trim() : "unknown";
 

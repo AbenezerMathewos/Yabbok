@@ -3,10 +3,26 @@ import { connectToDatabase } from "@/backend/lib/mongodb";
 import User from "@/backend/models/User";
 import Church from "@/backend/models/Church";
 import bcrypt from "bcryptjs";
+import { RegisterSchema, formatZodError } from "@/lib/validators";
+import { rateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: Request) {
+  // Rate limit: 5 registrations per 15 minutes per IP
+  const limited = rateLimit(req, { windowMs: 15 * 60 * 1000, max: 5 });
+  if (limited) return limited;
+
   try {
     const body = await req.json();
+
+    // Validate input with Zod
+    const parsed = RegisterSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", fields: formatZodError(parsed.error) },
+        { status: 400 }
+      );
+    }
+
     const {
       name,
       email,
@@ -21,24 +37,7 @@ export async function POST(req: Request) {
       ministryAreas,
       educationalStatus,
       bio,
-    } = body;
-
-    // Check required fields
-    if (
-      !name ||
-      !email ||
-      !phone ||
-      !password ||
-      !gender ||
-      !dob ||
-      !churchId ||
-      !churchBranch ||
-      !region ||
-      !educationalStatus ||
-      !profilePhoto
-    ) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
+    } = parsed.data;
 
     await connectToDatabase();
 

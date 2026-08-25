@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser, requireUser, handleApiError } from "@/backend/auth/session";
 import { connectToDatabase } from "@/backend/lib/mongodb";
 import Devotional from "@/backend/models/Devotional";
+import { awardBadge } from "@/lib/awardBadge";
 
 export async function GET() {
   try {
@@ -40,7 +41,31 @@ export async function POST(req: Request) {
       await devo.save();
     }
 
-    return NextResponse.json(devo);
+    // ── Check for 7-day consecutive streak ────────────────────────────────
+    let unlockedBadge = null;
+    const STREAK_DAYS = 7;
+    let hasStreak = true;
+
+    for (let i = 1; i < STREAK_DAYS; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      const pastDevo = await Devotional.findOne({
+        date: dateStr,
+        completedUsers: userObj.id,
+      });
+      if (!pastDevo) {
+        hasStreak = false;
+        break;
+      }
+    }
+
+    if (hasStreak) {
+      unlockedBadge = await awardBadge(userObj.id, "devotional_master");
+    }
+    // ──────────────────────────────────────────────────────────────────────
+
+    return NextResponse.json({ devotional: devo, unlockedBadge });
   } catch (err) {
     return handleApiError(err, "Failed to record quiet time");
   }

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { requireUser, handleApiError } from "@/backend/auth/session";
 import { connectToDatabase } from "@/backend/lib/mongodb";
 import Prayer from "@/backend/models/Prayer";
+import { PrayerSchema, PrayerPatchSchema, formatZodError } from "@/lib/validators";
+import { rateLimit } from "@/lib/rateLimit";
+import { awardBadge } from "@/lib/awardBadge";
 
 export async function GET() {
   try {
@@ -16,9 +19,23 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  // Rate limit: 10 prayer posts per 15 minutes per IP
+  const limited = rateLimit(req, { windowMs: 15 * 60 * 1000, max: 10 });
+  if (limited) return limited;
+
   try {
     const userObj = await requireUser();
-    const { title, description, category, isAnonymous } = await req.json();
+    const body = await req.json();
+
+    const parsed = PrayerSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", fields: formatZodError(parsed.error) },
+        { status: 400 }
+      );
+    }
+
+    const { title, description, category, isAnonymous } = parsed.data;
     await connectToDatabase();
 
     const newPrayer = await Prayer.create({
@@ -39,7 +56,17 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const userObj = await requireUser();
-    const { prayerId, action, testimony } = await req.json();
+    const body = await req.json();
+
+    const parsed = PrayerPatchSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", fields: formatZodError(parsed.error) },
+        { status: 400 }
+      );
+    }
+
+    const { prayerId, action, testimony } = parsed.data;
     await connectToDatabase();
 
     const prayer = await Prayer.findById(prayerId);
@@ -47,11 +74,22 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "Prayer request not found" }, { status: 404 });
     }
 
+    let unlockedBadge = null;
+
     if (action === "pray") {
       if (!prayer.prayedUsers.includes(userObj.id)) {
         prayer.prayedUsers.push(userObj.id);
         prayer.prayedCount += 1;
         await prayer.save();
+
+        // Count total prayers this user has interceded for
+        const totalIntercessions = await Prayer.countDocuments({
+          prayedUsers: userObj.id,
+        });
+        // Award prayer_warrior badge after 10 intercessions
+        if (totalIntercessions >= 10) {
+          unlockedBadge = await awardBadge(userObj.id, "prayer_warrior");
+        }
       }
     } else if (action === "testimony") {
       if (prayer.user.toString() !== userObj.id) {
@@ -63,7 +101,7 @@ export async function PATCH(req: Request) {
     }
 
     const updated = await Prayer.findById(prayerId).populate("user", "name profilePhoto churchBranch");
-    return NextResponse.json(updated);
+    return NextResponse.json({ prayer: updated, unlockedBadge });
   } catch (err) {
     return handleApiError(err, "Failed to update prayer request");
   }
