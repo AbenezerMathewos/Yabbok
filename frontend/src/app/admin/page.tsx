@@ -62,7 +62,7 @@ export default function AdminPage() {
 
   if (status === "loading" || !session || !isAdmin) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
+      <div className="flex h-screen items-center justify-center bg-slate-950/85 backdrop-blur-2xl">
         <div className="flex flex-col items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center animate-pulse">
             <Shield size={28} className="text-slate-950" />
@@ -89,7 +89,7 @@ export default function AdminPage() {
   const tabTitle = CurrentTabMeta[language as "en" | "am"];
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen bg-slate-950/85 backdrop-blur-2xl overflow-hidden">
       {/* ── Main Global Sidebar ── */}
       <AppSidebar />
 
