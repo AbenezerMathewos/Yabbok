@@ -186,83 +186,95 @@ function EventCard({
 }) {
   const eventDate = new Date(event.date);
 
+  // Generate a consistent but distinct gradient based on the event ID or title length
+  const gradientIndex = (event.title.length % 3) + 1;
+  const gradientClass = 
+    gradientIndex === 1 ? "from-gold-600 to-amber-700" :
+    gradientIndex === 2 ? "from-blue-600 to-indigo-800" :
+    "from-emerald-600 to-teal-800";
+
   return (
-    <article className="h-full p-7 rounded-3xl bg-card border border-border/60 shadow-sm flex flex-col justify-between hover:shadow-lg hover:border-primary/30 transition-all duration-300">
-      <div>
-        <div className="flex justify-between items-start gap-2 mb-4">
-          <Badge variant="outline" className="text-primary border-primary/30 font-bold text-[10px] uppercase tracking-wider bg-primary/5">
-            {event.category}
-          </Badge>
-          {event.isLive && (
-            <Badge variant="outline" className="text-destructive border-destructive/30 font-bold text-[10px] uppercase tracking-wider bg-destructive/5 flex items-center gap-1.5 animate-pulse">
-              <span className="w-1.5 h-1.5 rounded-full bg-destructive" />
-              Live
-            </Badge>
-          )}
-        </div>
-
-        <h3 className="font-black text-xl md:text-2xl text-foreground mt-2 leading-tight">
-          {event.title}
-        </h3>
-
-        <p className="text-sm text-muted-foreground mt-3 leading-relaxed font-medium">
-          {event.description}
-        </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 p-4 rounded-2xl bg-muted/30 border border-border/50 text-sm">
-          <div className="flex items-center gap-3 text-foreground font-semibold">
-            <div className="w-9 h-9 rounded-xl bg-background flex items-center justify-center shrink-0 border border-border/50">
-              <Clock size={16} className="text-primary" />
-            </div>
-            <div>
-              <span className="block">{eventDate.toLocaleDateString(language === "en" ? "en-US" : "am-ET", { dateStyle: "medium" })}</span>
-              <span className="text-[10px] text-muted-foreground font-bold">{eventDate.toLocaleTimeString(language === "en" ? "en-US" : "am-ET", { timeStyle: "short" })}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 text-foreground font-semibold">
-            <div className="w-9 h-9 rounded-xl bg-background flex items-center justify-center shrink-0 border border-border/50">
-              <MapPin size={16} className="text-primary" />
-            </div>
-            <div>
-              <span className="block truncate max-w-[140px]" title={event.location}>{event.location}</span>
-              <span className="text-[10px] text-muted-foreground font-bold">{event.isLive ? event.livePlatform : language === "en" ? "Physical Venue" : "ቦታ"}</span>
-            </div>
-          </div>
-        </div>
+    <article className="relative h-[420px] rounded-3xl overflow-hidden group hover:shadow-2xl hover:shadow-gold-500/20 transition-all duration-500">
+      {/* Background Image / Gradient */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${gradientClass} transition-transform duration-700 group-hover:scale-105`}>
+        {event.images && event.images.length > 0 && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={event.images[0]} alt={event.title} className="w-full h-full object-cover mix-blend-overlay opacity-80" />
+        )}
+        {/* Dark vignette overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent" />
       </div>
 
-      <div className="mt-7 flex items-center justify-between gap-4">
-        {event.isLive && event.liveMeetingUrl ? (
-          <Button
-            variant="outline"
-            className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground font-bold h-11 px-5 rounded-xl gap-2 transition-all shrink-0"
-            onClick={() => window.open(event.liveMeetingUrl, "_blank")}
-          >
-            <Video size={16} />
-            {language === "en" ? "Join Stream" : "ቀጥታ ይግቡ"}
-          </Button>
-        ) : (
-          <div />
+      {/* Top Badges */}
+      <div className="absolute top-5 inset-x-5 flex justify-between items-start z-10">
+        <Badge variant="outline" className="text-white border-white/30 font-black text-[10px] uppercase tracking-widest bg-white/10 backdrop-blur-md shadow-lg">
+          {event.category}
+        </Badge>
+        {event.isLive && (
+          <Badge variant="outline" className="text-white border-rose-500/50 font-black text-[10px] uppercase tracking-widest bg-rose-500/80 backdrop-blur-md flex items-center gap-1.5 shadow-[0_0_15px_rgba(244,63,94,0.6)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            Live Now
+          </Badge>
         )}
+      </div>
 
-        <Button
-          onClick={() => onRegister(event._id)}
-          className={`h-11 px-6 rounded-xl font-bold transition-all shadow-sm ${
-            isRegistered
-              ? "bg-emerald-500 text-white hover:bg-emerald-600 gap-2"
-              : "bg-primary text-primary-foreground hover:bg-primary/90 gold-glow"
-          }`}
-        >
-          {isRegistered ? (
-            <>
-              <Check size={16} />
-              {language === "en" ? "Registered" : "ተመዝግበዋል"}
-            </>
-          ) : (
-            language === "en" ? "Register / RSVP" : "ይመዝገቡ"
-          )}
-        </Button>
+      {/* Glassmorphism Content Overlay */}
+      <div className="absolute bottom-0 inset-x-0 p-5 z-10">
+        <div className="p-5 rounded-2xl bg-white/10 dark:bg-slate-950/40 backdrop-blur-xl border border-white/20 shadow-xl flex flex-col gap-4 transition-transform duration-300">
+          
+          <div>
+            <h3 className="font-black text-xl text-white leading-tight drop-shadow-md line-clamp-1">
+              {event.title}
+            </h3>
+            <p className="text-sm text-slate-200 mt-1.5 font-medium line-clamp-2 drop-shadow">
+              {event.description}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-200">
+            <div className="flex items-center gap-2">
+              <Clock size={14} className="text-gold-400" />
+              <span>{eventDate.toLocaleDateString(language === "en" ? "en-US" : "am-ET", { month: "short", day: "numeric" })} • {eventDate.toLocaleTimeString(language === "en" ? "en-US" : "am-ET", { timeStyle: "short" })}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <MapPin size={14} className="text-gold-400" />
+              <span className="truncate max-w-[120px]">{event.isLive ? event.livePlatform : event.location}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between gap-3 mt-1 pt-4 border-t border-white/10">
+            {event.isLive && event.liveMeetingUrl ? (
+              <Button
+                variant="outline"
+                className="flex-1 bg-white/5 border-white/20 text-white hover:bg-white hover:text-slate-950 font-bold h-10 rounded-xl transition-all"
+                onClick={() => window.open(event.liveMeetingUrl, "_blank")}
+              >
+                <Video size={16} className="mr-2" />
+                {language === "en" ? "Join Stream" : "ቀጥታ ይግቡ"}
+              </Button>
+            ) : (
+              <div />
+            )}
+
+            <Button
+              onClick={() => onRegister(event._id)}
+              className={`flex-1 h-10 rounded-xl font-bold transition-all shadow-lg ${
+                isRegistered
+                  ? "bg-emerald-500 hover:bg-emerald-600 text-white border-transparent"
+                  : "bg-gold-500 hover:bg-gold-600 text-slate-950"
+              }`}
+            >
+              {isRegistered ? (
+                <>
+                  <Check size={16} className="mr-2" />
+                  {language === "en" ? "Registered" : "ተመዝግበዋል"}
+                </>
+              ) : (
+                language === "en" ? "Register / RSVP" : "ይመዝገቡ"
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
     </article>
   );

@@ -134,6 +134,13 @@ export function DashboardFeeds({ user }: DashboardFeedsProps) {
     fetchInsights();
   };
 
+  // Combine and sort feed items by createdAt
+  const feedItems = [
+    ...insights.map(i => ({ ...i, feedType: 'insight' })),
+    ...prayers.map(p => ({ ...p, feedType: 'prayer' })),
+    ...testimonies.map(t => ({ ...t, feedType: 'testimony' }))
+  ].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+
   return (
     <div className="space-y-8">
       {/* Share Inputs forms */}
@@ -216,121 +223,133 @@ export function DashboardFeeds({ user }: DashboardFeedsProps) {
         </div>
       </div>
 
-      <div className="space-y-6">
-        <h3 className="font-extrabold text-lg text-slate-900 dark:text-white border-b pb-2">
+      <div className="border-t border-slate-200 dark:border-slate-800 pt-6">
+        <h3 className="font-extrabold text-lg text-slate-900 dark:text-white mb-6">
           🌿 Community Fellowship Stream
         </h3>
 
-        {insights.map((insight: any) => (
-          <div key={insight._id} className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/60 shadow-sm space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-gold-500 text-white flex items-center justify-center font-bold text-xs">
-                {insight.user?.name?.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <h4 className="font-bold text-xs">{insight.user?.name}</h4>
-                <span className="text-[9px] text-slate-400">What God Taught Me Today</span>
-              </div>
-            </div>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-              {insight.content}
-            </p>
-            {insight.bibleReferences?.length > 0 && (
-              <div className="flex gap-1.5 flex-wrap">
-                {insight.bibleReferences.map((ref: string, idx: number) => (
-                  <span key={idx} className="px-2 py-0.5 rounded bg-gold-500/10 text-gold-600 dark:text-gold-400 text-[10px] font-bold border border-gold-500/25">
-                    📖 {ref}
-                  </span>
-                ))}
-              </div>
-            )}
-            <div className="pt-2 flex gap-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800">
-              <button onClick={() => handleInsightAction(insight._id, "react", "praise_god")} className="hover:text-gold-500 flex items-center gap-1 font-semibold">
-                🙌 Praise God ({insight.reactions?.length || 0})
-              </button>
-            </div>
-          </div>
-        ))}
-
-        {prayers.map((prayer: any) => (
-          <div key={prayer._id} className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/60 shadow-sm space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold text-xs">
-                {prayer.isAnonymous ? "🕊️" : prayer.user?.name?.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <h4 className="font-bold text-xs">
-                  {prayer.isAnonymous ? (language === 'en' ? 'Anonymous Member' : 'ስሙ ያልተጠቀሰ አባል') : prayer.user?.name}
-                </h4>
-                <span className="text-[9px] text-slate-400">Prayer Wall Request</span>
-              </div>
-            </div>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              {prayer.content}
-            </p>
-            
-            <div className="pt-2 flex flex-wrap gap-4 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800">
-              <button
-                onClick={() => handlePrayerAction(prayer._id, "pray")}
-                className={`flex items-center gap-1 font-semibold hover:text-gold-500 ${
-                  prayer.prayedForBy?.includes(user?.id) ? "text-gold-500 font-bold" : ""
-                }`}
-              >
-                🙏 {t("btnIPrayed")} ({prayer.prayedForBy?.length || 0})
-              </button>
-
-              <button onClick={() => handlePrayerAction(prayer._id, "react", "amen")} className="flex items-center gap-1 font-semibold hover:text-gold-500">
-                ✨ Amen ({prayer.reactions?.filter((r: any) => r.type === "amen").length || 0})
-              </button>
-            </div>
-
-            <div className="pt-3 space-y-2 bg-slate-50 dark:bg-slate-950 p-3 rounded-xl">
-              <h5 className="font-bold text-[10px] text-slate-400 uppercase tracking-wider">
-                {t("commentsLabel")}
-              </h5>
-              {prayer.comments?.map((c: any, idx: number) => (
-                <div key={idx} className="text-xs leading-relaxed border-b border-slate-100 dark:border-slate-900 pb-1.5 last:border-b-0">
-                  <span className="font-bold text-slate-900 dark:text-white mr-1.5">{c.user?.name}:</span>
-                  <span className="text-slate-500 dark:text-slate-400">{c.content}</span>
+        <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+          {feedItems.map((item: any) => {
+            if (item.feedType === "insight") {
+              return (
+                <div key={`insight-${item._id}`} className="break-inside-avoid p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/60 shadow-sm space-y-3 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gold-500 text-white flex items-center justify-center font-bold text-xs">
+                      {item.user?.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xs">{item.user?.name}</h4>
+                      <span className="text-[9px] text-slate-400">What God Taught Me</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+                    {item.content}
+                  </p>
+                  {item.bibleReferences?.length > 0 && (
+                    <div className="flex gap-1.5 flex-wrap">
+                      {item.bibleReferences.map((ref: string, idx: number) => (
+                        <span key={idx} className="px-2 py-0.5 rounded bg-gold-500/10 text-gold-600 dark:text-gold-400 text-[10px] font-bold border border-gold-500/25">
+                          📖 {ref}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="pt-2 flex gap-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800">
+                    <button onClick={() => handleInsightAction(item._id, "react", "praise_god")} className="hover:text-gold-500 flex items-center gap-1 font-semibold">
+                      🙌 Praise God ({item.reactions?.length || 0})
+                    </button>
+                  </div>
                 </div>
-              ))}
-              
-              <div className="flex gap-2 mt-2 pt-2 border-t border-slate-200/50">
-                <input
-                  type="text"
-                  value={commentInput[prayer._id] || ""}
-                  onChange={(e) => setCommentInput({ ...commentInput, [prayer._id]: e.target.value })}
-                  placeholder={t("addCommentPlaceholder")}
-                  className="flex-grow px-3 py-1.5 border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 text-xs focus:outline-none"
-                />
-                <button onClick={() => handleAddPrayerComment(prayer._id)} className="px-3.5 py-1.5 bg-gold-500 text-slate-950 font-bold rounded-lg text-xs">
-                  {t("btnComment")}
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+              );
+            }
 
-        {testimonies.map((test: any) => (
-          <div key={test._id} className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/60 shadow-sm space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-xs">
-                {test.user?.name?.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <h4 className="font-bold text-xs">{test.user?.name}</h4>
-                <span className="text-[9px] text-slate-400">Praise Testimony</span>
-              </div>
-            </div>
-            <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">{test.title}</h4>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{test.content}</p>
-            <div className="pt-2 flex gap-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800">
-              <button onClick={() => handleTestimonyAction(test._id, "react", "praise_god")} className="hover:text-gold-500 flex items-center gap-1 font-semibold">
-                🙌 Praise God ({test.reactions?.length || 0})
-              </button>
-            </div>
-          </div>
-        ))}
+            if (item.feedType === "prayer") {
+              return (
+                <div key={`prayer-${item._id}`} className="break-inside-avoid p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/60 shadow-sm space-y-3 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold text-xs">
+                      {item.isAnonymous ? "🕊️" : item.user?.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xs">
+                        {item.isAnonymous ? (language === 'en' ? 'Anonymous Member' : 'ስሙ ያልተጠቀሰ አባል') : item.user?.name}
+                      </h4>
+                      <span className="text-[9px] text-slate-400">Prayer Wall Request</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    {item.content}
+                  </p>
+                  
+                  <div className="pt-2 flex flex-wrap gap-4 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800">
+                    <button
+                      onClick={() => handlePrayerAction(item._id, "pray")}
+                      className={`flex items-center gap-1 font-semibold hover:text-gold-500 transition-transform hover:scale-105 active:scale-95 ${
+                        item.prayedForBy?.includes(user?.id) ? "text-gold-500 font-bold" : ""
+                      }`}
+                    >
+                      🙏 {t("btnIPrayed")} ({item.prayedForBy?.length || 0})
+                    </button>
+
+                    <button onClick={() => handlePrayerAction(item._id, "react", "amen")} className="flex items-center gap-1 font-semibold hover:text-gold-500 transition-transform hover:scale-105 active:scale-95">
+                      ✨ Amen ({item.reactions?.filter((r: any) => r.type === "amen").length || 0})
+                    </button>
+                  </div>
+
+                  <div className="pt-3 space-y-2 bg-slate-50 dark:bg-slate-950 p-3 rounded-xl mt-2">
+                    <h5 className="font-bold text-[10px] text-slate-400 uppercase tracking-wider">
+                      {t("commentsLabel")}
+                    </h5>
+                    {item.comments?.map((c: any, idx: number) => (
+                      <div key={idx} className="text-xs leading-relaxed border-b border-slate-100 dark:border-slate-900 pb-1.5 last:border-b-0">
+                        <span className="font-bold text-slate-900 dark:text-white mr-1.5">{c.user?.name}:</span>
+                        <span className="text-slate-500 dark:text-slate-400">{c.content}</span>
+                      </div>
+                    ))}
+                    
+                    <div className="flex gap-2 mt-2 pt-2 border-t border-slate-200/50 dark:border-slate-800">
+                      <input
+                        type="text"
+                        value={commentInput[item._id] || ""}
+                        onChange={(e) => setCommentInput({ ...commentInput, [item._id]: e.target.value })}
+                        placeholder={t("addCommentPlaceholder")}
+                        className="flex-grow px-3 py-1.5 border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 text-xs focus:outline-none"
+                      />
+                      <button onClick={() => handleAddPrayerComment(item._id)} className="px-3.5 py-1.5 bg-gold-500 text-slate-950 font-bold rounded-lg text-xs">
+                        {t("btnComment")}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            if (item.feedType === "testimony") {
+              return (
+                <div key={`testimony-${item._id}`} className="break-inside-avoid p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/60 shadow-sm space-y-3 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-xs">
+                      {item.user?.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xs">{item.user?.name}</h4>
+                      <span className="text-[9px] text-slate-400">Praise Testimony</span>
+                    </div>
+                  </div>
+                  <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">{item.title}</h4>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{item.content}</p>
+                  <div className="pt-2 flex gap-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800">
+                    <button onClick={() => handleTestimonyAction(item._id, "react", "praise_god")} className="hover:text-gold-500 flex items-center gap-1 font-semibold transition-transform hover:scale-105 active:scale-95">
+                      🙌 Praise God ({item.reactions?.length || 0})
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+
+            return null;
+          })}
+        </div>
       </div>
     </div>
   );
