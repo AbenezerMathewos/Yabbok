@@ -9,7 +9,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { NotificationBell } from "./NotificationBell";
 import { CommandPalette } from "./CommandPalette";
-import { Menu, X, ChevronDown, LogOut, Shield, Heart, Users, BookOpen, HandHeart, Calendar, MapPin, Briefcase, MessageSquareHeart, Search, Radio } from "lucide-react";
+import { Menu, X, ChevronDown, LogOut, Shield, Heart, Users, BookOpen, HandHeart, Calendar, MapPin, Briefcase, MessageSquareHeart, Search, Radio, HelpCircle, Award, CreditCard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const Navbar: React.FC = () => {
@@ -41,6 +41,8 @@ export const Navbar: React.FC = () => {
       key: "media",
       items: [
         { href: "/live", label: language === 'en' ? "🔴 Live Stream" : "🔴 ቀጥታ ስርጭት", icon: <Radio size={16} className="text-rose-500 animate-pulse" />, show: true },
+        { href: "/quiz", label: language === 'en' ? "Bible Quiz" : "የመጽሐፍ ቅዱስ ጥያቄዎች", icon: <HelpCircle size={16} className="text-gold-500" />, show: true },
+        { href: "/badges", label: language === 'en' ? "Youth Badges" : "የወጣቶች ባጆች", icon: <Award size={16} className="text-amber-500" />, show: true },
         { href: "/devotional", label: language === 'en' ? "Daily Devotional" : "የእለት ቃል", icon: <BookOpen size={16} />, show: true },
         { href: "/sermons", label: t("navSermons"), icon: <BookOpen size={16} />, show: true },
         { href: "/events", label: t("navEvents"), icon: <Calendar size={16} />, show: true },
@@ -51,6 +53,7 @@ export const Navbar: React.FC = () => {
       label: language === 'en' ? "Community Care" : "የማህበረሰብ እንክብካቤ",
       key: "community",
       items: [
+        { href: "/card", label: language === 'en' ? "Digital Member ID" : "ዲጂታል መታወቂያ", icon: <CreditCard size={16} className="text-gold-400" />, show: true },
         { href: "/prayer", label: language === 'en' ? "Prayer Wall" : "የጸሎት ግድግዳ", icon: <MessageSquareHeart size={16} />, show: true },
         { href: "/mutual-aid", label: language === 'en' ? "Mutual Aid" : "የእርስ በእርስ እርዳታ", icon: <HandHeart size={16} />, show: !!session },
         { href: "/volunteer", label: language === 'en' ? "Volunteer Engine" : "በጎ ፈቃደኝነት", icon: <Users size={16} />, show: !!session },

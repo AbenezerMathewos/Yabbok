@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useAudio } from "@/frontend/context/AudioContext";
 import { useLanguage } from "@/frontend/context/LanguageContext";
+import { OfflineDownloadButton } from "@/frontend/components/sermons/OfflineDownloadButton";
 import { Play, Pause, X, Music, Volume2, VolumeX } from "lucide-react";
 
 export function GlobalAudioPlayer() {
@@ -109,9 +110,7 @@ export function GlobalAudioPlayer() {
           {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
         </button>
 
-        <span className="text-[9px] font-bold text-gold-400 uppercase tracking-wider">
-          {language === 'en' ? 'Audio Stream' : 'ድምጽ'}
-        </span>
+        <OfflineDownloadButton audioUrl={currentTrack.audioUrl} title={currentTrack.title} />
       </div>
     </div>
   );

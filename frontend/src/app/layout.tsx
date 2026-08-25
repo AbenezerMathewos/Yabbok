@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/frontend/context/ThemeProvider";
 import { AuthProvider } from "@/frontend/context/AuthContext";
 import { AudioProvider } from "@/frontend/context/AudioContext";
 import { GlobalAudioPlayer } from "@/frontend/components/shared/GlobalAudioPlayer";
+import { ServiceWorkerRegister } from "@/frontend/components/shared/ServiceWorkerRegister";
 import { Geist } from "next/font/google";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -42,6 +43,7 @@ export default function RootLayout({
                   {children}
                 </SmoothScroll>
                 <GlobalAudioPlayer />
+                <ServiceWorkerRegister />
                 <Toaster 
                   richColors 
                   position="top-right" 

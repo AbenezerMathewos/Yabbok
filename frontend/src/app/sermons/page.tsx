@@ -5,6 +5,7 @@ import { useLanguage } from "@/frontend/context/LanguageContext";
 import { useAudio } from "@/frontend/context/AudioContext";
 import { Navbar } from "@/frontend/components/shared/Navbar";
 import { Footer } from "@/frontend/components/shared/Footer";
+import { OfflineDownloadButton } from "@/frontend/components/sermons/OfflineDownloadButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Square, Loader2, Music, Video, FileText, ChevronDown, ChevronUp, BookOpen, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -105,22 +106,25 @@ export default function SermonsPage() {
                         {/* Right actions */}
                         <div className="flex flex-wrap md:flex-col gap-2 shrink-0">
                           {sermon.audioUrl && (
-                            <button
-                              onClick={() => {
-                                playTrack({ title: sermon.title, speaker: sermon.speaker, audioUrl: sermon.audioUrl });
-                                setActiveVideoId(null);
-                              }}
-                              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                                currentTrack?.audioUrl === sermon.audioUrl && isPlaying
-                                  ? "bg-gold-500 text-slate-950 animate-pulse"
-                                  : "bg-primary text-primary-foreground hover:bg-primary/90 shadow gold-glow"
-                              }`}
-                            >
-                              <Play size={14} fill="currentColor" />
-                              {currentTrack?.audioUrl === sermon.audioUrl && isPlaying
-                                ? (language === "en" ? "Now Playing..." : "እየተጫወተ ነው...")
-                                : (language === "en" ? "Play Audio" : "ድምጽ አጫውት")}
-                            </button>
+                            <div className="flex flex-wrap gap-2">
+                              <button
+                                onClick={() => {
+                                  playTrack({ title: sermon.title, speaker: sermon.speaker, audioUrl: sermon.audioUrl });
+                                  setActiveVideoId(null);
+                                }}
+                                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                                  currentTrack?.audioUrl === sermon.audioUrl && isPlaying
+                                    ? "bg-gold-500 text-slate-950 animate-pulse"
+                                    : "bg-primary text-primary-foreground hover:bg-primary/90 shadow gold-glow"
+                                }`}
+                              >
+                                <Play size={14} fill="currentColor" />
+                                {currentTrack?.audioUrl === sermon.audioUrl && isPlaying
+                                  ? (language === "en" ? "Now Playing..." : "እየተጫወተ ነው...")
+                                  : (language === "en" ? "Play Audio" : "ድምጽ አጫውት")}
+                              </button>
+                              <OfflineDownloadButton audioUrl={sermon.audioUrl} title={sermon.title} />
+                            </div>
                           )}
                           {sermon.videoUrl && (
                             <button
