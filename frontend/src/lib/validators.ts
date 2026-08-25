@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// -- Registration ------------------------------------------------------------
+// Registration
 export const RegisterSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
   email: z.string().email("Invalid email address"),
@@ -27,7 +27,7 @@ export const RegisterSchema = z.object({
 
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 
-// -- Prayer Request -----------------------------------------------------------
+// Prayer Request
 export const PrayerSchema = z.object({
   title: z
     .string()
@@ -51,7 +51,7 @@ export const PrayerSchema = z.object({
 
 export type PrayerInput = z.infer<typeof PrayerSchema>;
 
-// -- Prayer PATCH (pray / testimony) -----------------------------------------
+// Prayer PATCH (pray / testimony)
 export const PrayerPatchSchema = z.object({
   prayerId: z.string().min(1, "Prayer ID is required"),
   action: z.enum(["pray", "testimony"]),
@@ -60,7 +60,7 @@ export const PrayerPatchSchema = z.object({
 
 export type PrayerPatchInput = z.infer<typeof PrayerPatchSchema>;
 
-// -- Event --------------------------------------------------------------------
+// Event
 export const EventSchema = z.object({
   title: z.string().min(3).max(150),
   description: z.string().min(10).max(2000),
@@ -74,7 +74,7 @@ export const EventSchema = z.object({
 
 export type EventInput = z.infer<typeof EventSchema>;
 
-// -- Sermon -------------------------------------------------------------------
+// Sermon
 export const SermonSchema = z.object({
   title: z.string().min(3).max(150),
   speaker: z.string().min(2).max(100),
@@ -87,9 +87,10 @@ export const SermonSchema = z.object({
 
 export type SermonInput = z.infer<typeof SermonSchema>;
 
-// -- Shared: format Zod errors into a flat message map -----------------------
+// Format Zod errors into a flat field -> message map
+// Uses .issues (Zod v3+) with explicit typing to avoid implicit any
 export function formatZodError(error: z.ZodError): Record<string, string> {
   return Object.fromEntries(
-    error.errors.map((e) => [e.path.join("."), e.message])
+    error.issues.map((issue: z.ZodIssue) => [issue.path.join("."), issue.message])
   );
 }
