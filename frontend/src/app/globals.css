@@ -176,7 +176,7 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   body {
-    @apply antialiased bg-background text-foreground selection:bg-gold-500/30;
+    @apply antialiased text-foreground selection:bg-gold-500/30;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display), sans-serif;
