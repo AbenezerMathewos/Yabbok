@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useLanguage } from "@/frontend/context/LanguageContext";
 import { Bell, Heart, Calendar, PlusCircle, CheckCircle2, BookOpen } from "lucide-react";
 import { BackgroundGeometric } from "@/components/ui/background-geometric";
+import { DivineOrb } from "@/components/ui/divine-orb";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
@@ -67,12 +68,15 @@ export function DashboardSummary({ user, isActive }: DashboardSummaryProps) {
   return (
     <div className="space-y-6">
       {/* ── Hero Banner ── */}
-      <div className="relative overflow-hidden rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-800 p-8 flex flex-col justify-end min-h-[200px]">
+      <div className="relative overflow-hidden rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-800 p-8 flex flex-col justify-end min-h-[220px]">
         {/* Absolute Background */}
         <BackgroundGeometric className="absolute inset-0 z-0 !opacity-100" color1="#d97706" color2="#fbbf24" speed={0.5} />
         
+        {/* 3D Liquid Gold Orb */}
+        <DivineOrb />
+
         {/* Overlay to ensure text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent z-0" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-slate-950/20 z-0" />
 
         <div className="relative z-10">
           <h2 className="text-3xl font-extrabold text-white drop-shadow-md">
