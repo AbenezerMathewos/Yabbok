@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/frontend/context/LanguageContext";
 import { User, Camera, Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { BadgeShowcase } from "./BadgeShowcase";
 
 export function DashboardProfile() {
   const { t } = useLanguage();
@@ -111,12 +112,13 @@ export function DashboardProfile() {
   };
 
   return (
-    <div className="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/60 shadow-sm">
-      {profileSuccess && (
-        <div className="p-4 mb-5 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-xs text-center font-bold">
-          ✓ Profile details updated successfully!
-        </div>
-      )}
+    <div className="space-y-6">
+      <div className="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/60 shadow-sm">
+        {profileSuccess && (
+          <div className="p-4 mb-5 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-xs text-center font-bold">
+            ✓ Profile details updated successfully!
+          </div>
+        )}
       {profileError && (
         <div className="p-4 mb-5 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20 text-xs text-center font-semibold">
           ⚠️ {profileError}
@@ -232,8 +234,11 @@ export function DashboardProfile() {
           ) : (
             <span>Update My Profile</span>
           )}
-        </button>
-      </form>
+          </button>
+        </form>
+      </div>
+
+      <BadgeShowcase />
     </div>
   );
 }
