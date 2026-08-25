@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Lock, Shield, Book, Heart, Users } from "lucide-react";
 import { useLanguage } from "@/frontend/context/LanguageContext";
+import { TiltCard } from "@/components/ui/tilt-card";
 
 export function BadgeShowcase() {
   const { language } = useLanguage();
@@ -41,7 +42,7 @@ export function BadgeShowcase() {
   }
 
   return (
-    <div className="mt-8 space-y-4">
+    <div className="mt-8 space-y-4 perspective-[1000px]">
       <h3 className="font-extrabold text-lg text-slate-900 dark:text-white flex items-center gap-2">
         🏆 Trophy Room
       </h3>
@@ -49,40 +50,55 @@ export function BadgeShowcase() {
         Earn badges by participating in the community, reading devotionals, and praying for others.
       </p>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-6">
         {badges.map((badge, idx) => {
           const isEarned = earnedBadges.includes(badge.id);
 
           return (
             <motion.div
               key={badge.id}
-              whileHover={isEarned ? { scale: 1.05, rotateY: 10 } : {}}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1, duration: 0.3 }}
-              style={{ transformStyle: "preserve-3d" }}
-              className={`relative p-5 rounded-2xl border flex flex-col items-center text-center transition-all ${
-                isEarned
-                  ? "bg-gradient-to-br from-gold-500/20 to-amber-500/5 border-gold-500/50 shadow-[0_0_15px_rgba(251,191,36,0.1)]"
-                  : "bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 opacity-60 grayscale"
-              }`}
             >
-              {!isEarned && (
-                <div className="absolute top-2 right-2">
-                  <Lock className="w-3 h-3 text-slate-400" />
+              <TiltCard
+                className={`relative p-6 rounded-3xl border flex flex-col items-center text-center h-full transition-all duration-300 ${
+                  isEarned
+                    ? "bg-gradient-to-br from-gold-500/30 to-amber-500/10 border-gold-400 shadow-[0_0_30px_rgba(251,191,36,0.15)]"
+                    : "bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 opacity-60 grayscale"
+                }`}
+              >
+                {!isEarned && (
+                  <div className="absolute top-3 right-3" style={{ transform: "translateZ(10px)" }}>
+                    <Lock className="w-3 h-3 text-slate-400" />
+                  </div>
+                )}
+                
+                <div 
+                  className={`p-5 rounded-full mb-4 shadow-2xl border ${
+                    isEarned 
+                      ? 'bg-gradient-to-tr from-gold-400 to-amber-600 text-white border-gold-300 shadow-gold-500/50' 
+                      : 'bg-slate-200 dark:bg-slate-800 text-slate-400 border-slate-300 dark:border-slate-700'
+                  }`}
+                  style={{ transform: "translateZ(40px)" }}
+                >
+                  {getIcon(badge.id)}
                 </div>
-              )}
-              
-              <div className={`p-4 rounded-full mb-3 ${isEarned ? 'bg-gold-500 text-white shadow-lg' : 'bg-slate-200 dark:bg-slate-800 text-slate-400'}`}>
-                {getIcon(badge.id)}
-              </div>
-              
-              <h4 className={`text-sm font-bold ${isEarned ? 'text-gold-700 dark:text-gold-400' : 'text-slate-500'}`}>
-                {language === "en" ? badge.nameEn : badge.nameAm}
-              </h4>
-              <p className="text-[10px] mt-1 text-slate-500 dark:text-slate-400">
-                {language === "en" ? badge.descriptionEn : badge.descriptionAm}
-              </p>
+                
+                <h4 
+                  className={`text-sm font-black mb-1 ${isEarned ? 'text-gold-700 dark:text-gold-400' : 'text-slate-500'}`}
+                  style={{ transform: "translateZ(20px)" }}
+                >
+                  {language === "en" ? badge.nameEn : badge.nameAm}
+                </h4>
+                
+                <p 
+                  className="text-[10px] text-slate-600 dark:text-slate-400"
+                  style={{ transform: "translateZ(10px)" }}
+                >
+                  {language === "en" ? badge.descriptionEn : badge.descriptionAm}
+                </p>
+              </TiltCard>
             </motion.div>
           );
         })}
