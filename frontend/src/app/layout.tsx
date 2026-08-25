@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { SmoothScroll } from "@/components/ui/smooth-scroll";
 import { ScrollProgress } from "@/components/ui/scroll-progress";
+import { VantaBackground } from "@/components/ui/vanta-background";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const plusJakarta = Plus_Jakarta_Sans({
@@ -33,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable, plusJakarta.variable)}>
-      <body className="min-h-screen bg-background text-foreground antialiased">
+      <body className="min-h-screen bg-transparent text-foreground antialiased">
         <AuthProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
             <LanguageProvider>
@@ -44,6 +45,7 @@ export default function RootLayout({
                 </SmoothScroll>
                 <GlobalAudioPlayer />
                 <ServiceWorkerRegister />
+                <VantaBackground />
                 <Toaster 
                   richColors 
                   position="top-right" 
