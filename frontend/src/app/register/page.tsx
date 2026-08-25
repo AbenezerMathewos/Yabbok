@@ -141,7 +141,7 @@ export default function RegisterPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-slate-950/85 backdrop-blur-2xl flex flex-col">
       {/* Top bar */}
       <div className="border-b border-border/50 px-6 py-4 flex items-center justify-between">
         <Link href="/" className="inline-flex items-center gap-2.5">
