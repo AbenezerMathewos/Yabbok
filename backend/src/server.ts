@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import connectDB from './config/db';
@@ -11,6 +12,9 @@ dotenv.config();
 connectDB();
 
 const app = express();
+
+// Security headers (X-Content-Type-Options, X-Frame-Options, HSTS, etc.)
+app.use(helmet());
 
 // Body parser
 app.use(express.json());

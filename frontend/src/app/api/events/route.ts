@@ -3,15 +3,14 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/backend/lib/auth";
 import { connectToDatabase } from "@/backend/lib/mongodb";
 import Event from "@/backend/models/Event";
+import { EventSchema, formatZodError } from "@/lib/validators";
 
 export async function GET(req: Request) {
   try {
     await connectToDatabase();
-    // Public route for approved upcoming/past events
     const events = await Event.find({ approvalStatus: 'approved', deletedAt: null })
       .sort({ date: 1 })
       .exec();
-
     return NextResponse.json(events, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -22,18 +21,24 @@ export async function POST(req: Request) {
   try {
     await connectToDatabase();
     const session = await getServerSession(authOptions);
-    
-    // RBAC: strictly admin or super_admin
+
     if (!session || !session.user || !['admin', 'super_admin'].includes(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized. Admin or SuperAdmin role required." }, { status: 403 });
     }
 
     const body = await req.json();
-    const { title, description, category, date, endDate, location, isLive, photoAdUrl, videoAdUrl, voiceAdUrl } = body;
 
-    if (!title || !description || !category || !date || !location) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    // Validate with Zod
+    const parsed = EventSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", fields: formatZodError(parsed.error) },
+        { status: 400 }
+      );
     }
+
+    const { title, description, category, date, isLive, livePlatform, liveMeetingUrl } = parsed.data;
+    const { endDate, location: loc, photoAdUrl, videoAdUrl, voiceAdUrl } = body;
 
     const event = await Event.create({
       title,
@@ -41,14 +46,16 @@ export async function POST(req: Request) {
       category,
       date: new Date(date),
       endDate: endDate ? new Date(endDate) : undefined,
-      location,
-      isLive: Boolean(isLive),
+      location: loc,
+      isLive,
+      livePlatform,
+      liveMeetingUrl,
       photoAdUrl,
       videoAdUrl,
       voiceAdUrl,
       organizer: session.user.id,
       churchId: session.user.churchId || undefined,
-      approvalStatus: 'approved' // Auto-approved since uploaded by admin
+      approvalStatus: 'approved',
     });
 
     return NextResponse.json(event, { status: 201 });
