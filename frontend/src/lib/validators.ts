@@ -66,9 +66,9 @@ export const EventSchema = z.object({
   description: z.string().min(10).max(2000),
   date: z.string().refine((d) => !isNaN(Date.parse(d)), "Invalid event date"),
   location: z.string().min(2).max(200),
-  category: z.string().min(1),
+  category: z.enum(['Conference', 'Youth Meeting', 'Prayer Night', 'Retreat', 'Bible Study']),
   isLive: z.boolean().optional().default(false),
-  livePlatform: z.string().optional(),
+  livePlatform: z.enum(['Zoom', 'Google Meet', 'YouTube Live', 'None']).optional(),
   liveMeetingUrl: z.string().url().optional().or(z.literal("")),
 });
 
