@@ -8,7 +8,19 @@ import Devotional from "@/backend/models/Devotional";
 import Prayer from "@/backend/models/Prayer";
 import bcrypt from "bcryptjs";
 
-export async function POST() {
+export async function POST(req: Request) {
+  // ── Security guard ───────────────────────────────────────────────────────
+  // Disabled in production. In development, requires X-Seed-Secret header.
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not Found" }, { status: 404 });
+  }
+  const seedSecret = process.env.SEED_SECRET;
+  const providedSecret = req.headers.get("x-seed-secret");
+  if (!seedSecret || providedSecret !== seedSecret) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
   try {
     await connectToDatabase();
 
@@ -154,10 +166,6 @@ export async function POST() {
     return NextResponse.json({
       success: true,
       message: "Database successfully seeded with admin user, churches, sermons, events, devotionals, and prayers!",
-      adminCredentials: {
-        email: adminEmail,
-        password: "Admin123!",
-      },
     });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });

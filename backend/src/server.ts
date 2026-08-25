@@ -14,8 +14,51 @@ const app = express();
 // Body parser
 app.use(express.json());
 
-// Enable CORS
-app.use(cors());
+// Build CORS allowlist from env var (comma-separated).
+// e.g. ALLOWED_ORIGINS=https://yabbok.org,https://www.yabbok.org
+const rawOrigins = process.env.ALLOWED_ORIGINS || "http://localhost:3000";
+const allowedOrigins = rawOrigins.split(",").map((o) => o.trim());
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow server-to-server requests (no Origin header) only in development
+      if (!origin) {
+        if (process.env.NODE_ENV !== "production") return callback(null, true);
+        return callback(new Error("CORS: no origin"));
+      }
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error(`CORS: origin '${origin}' not allowed`));
+    },
+    credentials: true,
+  })
+);
+
+import rateLimit from 'express-rate-limit';
+
+// ── Rate limiting ────────────────────────────────────────────────────────────
+// Global limiter: 200 requests per 15 minutes per IP
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Please try again later.' },
+});
+
+// Strict limiter for write/auth-sensitive routes: 10 requests per 15 minutes per IP
+const strictLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Please try again later.' },
+});
+
+app.use(globalLimiter);
+// ────────────────────────────────────────────────────────────────────────────
 
 import discussionsRouter from './routes/discussions';
 import prayersRouter from './routes/prayers';
@@ -38,7 +81,7 @@ import booksRouter from './routes/books';
 // Mount routers
 app.use('/api/discussions', discussionsRouter);
 app.use('/api/prayers', prayersRouter);
-app.use('/api/admin', adminRouter);
+app.use('/api/admin', strictLimiter, adminRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/churches', churchesRouter);
 app.use('/api/events', eventsRouter);
@@ -46,7 +89,7 @@ app.use('/api/gallery', galleryRouter);
 app.use('/api/insights', insightsRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/profile', profileRouter);
-app.use('/api/reports', reportsRouter);
+app.use('/api/reports', reportRouter);
 app.use('/api/sermons', sermonsRouter);
 app.use('/api/suggestions', suggestionsRouter);
 app.use('/api/testimonies', testimoniesRouter);

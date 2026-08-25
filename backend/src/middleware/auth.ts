@@ -12,8 +12,11 @@ declare global {
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // We use next-auth's getToken to decode the secure session cookie/token
-    const secret = process.env.NEXTAUTH_SECRET || "yabbok-super-secret-key-12345";
+    const secret = process.env.NEXTAUTH_SECRET;
+    if (!secret) {
+      console.error("FATAL: NEXTAUTH_SECRET environment variable is not set.");
+      return res.status(500).json({ error: "Server misconfiguration" });
+    }
     const token = await getToken({ req, secret });
 
     if (!token) {
