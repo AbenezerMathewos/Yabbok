@@ -138,7 +138,7 @@ function LoginContent() {
       </div>
 
       {/* ── RIGHT PANEL — Login Form ── */}
-      <div className="flex-1 flex items-center justify-center bg-background px-6 py-12">
+      <div className="flex-1 flex items-center justify-center bg-slate-950/85 backdrop-blur-2xl px-6 py-12">
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -259,7 +259,7 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="flex h-screen items-center justify-center bg-background">
+      <div className="flex h-screen items-center justify-center bg-slate-950/85 backdrop-blur-2xl">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center animate-pulse">
             <BookOpen size={24} className="text-slate-950" />
