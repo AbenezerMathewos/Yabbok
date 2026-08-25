@@ -47,7 +47,7 @@ export default function DashboardPage() {
 
   if (status === "loading" || !session) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
+      <div className="flex h-screen items-center justify-center bg-slate-950/85 backdrop-blur-2xl">
         <div className="flex flex-col items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center animate-pulse">
             <BookOpen size={28} className="text-slate-950" />
@@ -63,7 +63,7 @@ export default function DashboardPage() {
   const tabTitle = language === "en" ? CurrentTabMeta.en : CurrentTabMeta.am;
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen bg-slate-950/85 backdrop-blur-2xl overflow-hidden">
       {/* ── Sidebar ── */}
       <AppSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
